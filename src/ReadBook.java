@@ -37,6 +37,7 @@ public class ReadBook extends Book {
         return username;
     }
 
+    //QUESTION: will this update that ReadBook's rating in both the user's readBooks ArrayList AND the allReadBooks ArrayList
     public void rateBook(){
         Scanner myScanner = new Scanner(System.in);
         System.out.println("Rating " +  super.getTitle() + " by " + super.getAuthor() + ":\n");

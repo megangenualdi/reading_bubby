@@ -169,9 +169,9 @@ public class ReadingBuddy {
             List<String[]> data = new ArrayList<String[]>();
             data.add(new String[] {"book_id","title","author","username","rating"});
             for(int x = 0; x < allReadBooks.size(); x++){
-                data.add(new String[] {Integer.toString(allCurrentBooks.get(x).getID()), 
-                    allCurrentBooks.get(x).getTitle(), allCurrentBooks.get(x).getAuthor(), 
-                    allCurrentBooks.get(x).getUsername(), Integer.toString(allReadBooks.get(x).getRating())});
+                data.add(new String[] {Integer.toString(allReadBooks.get(x).getID()), 
+                    allReadBooks.get(x).getTitle(), allReadBooks.get(x).getAuthor(), 
+                    allReadBooks.get(x).getUsername(), Integer.toString(allReadBooks.get(x).getRating())});
             }
             writer.writeAll(data); 
             // closing writer connection 
@@ -337,7 +337,7 @@ public class ReadingBuddy {
                 } else {
                     selectedBook = currentUser.getReadBooks().get(numSelected-1);
                     System.out.println("\nRate the book with any (whole) number from 1 to 10. Enter 0 to exit without rating");
-                    selectedBook.rateBook();
+                    selectedBook.rateBook(myScanner);
                     updateReadBookRating(selectedBook);
                     //ADD rating to file data
                 }
@@ -457,14 +457,11 @@ public class ReadingBuddy {
         getNextIds();
         getAllBooks();
     
-        //once user logged in pull in all the relevant info for user
-        //HARDCODED FOR NOW
         getAllReadBooksData();
         getAllCurrentBooksData();
 
-        //FOR TESTING
-        System.out.println("current books read in: " + allCurrentBooks.size());
-
+         //once user logged in pull in all the relevant info for user
+        //HARDCODED FOR NOW
         currentUser = new User(1, "tester1");
         currentUser.initialSetCurrentlyReading(allCurrentBooks);
         currentUser.initialSetReadBooks(allReadBooks);
@@ -480,12 +477,12 @@ public class ReadingBuddy {
         //}
 
         boolean isLoggedIn = true;
-        int menuSelection;//to hold number representing which menu choice user has made
+        int mainMenuSelection;//to hold number representing which menu choice user has made
 
         //Loop that constitutes being logged in and will keep returning user to main menu unless log out
         do{
-            menuSelection = mainMenu();
-            switch (menuSelection) {
+            mainMenuSelection = mainMenu();
+            switch (mainMenuSelection) {
                 case 1:
                     manageMyBooksMenu();
                     break;

@@ -24,28 +24,20 @@ public class ReadingBuddy {
     static ArrayList<ReadBook> allReadBooks = new ArrayList<ReadBook>();
 
 
-    //validate that the user input was a valid numbered menu option
-   /*  public static int validateMenuSelection(int minVal, int maxVal){
+    public static int validateMenuSelection(int minVal, int maxVal){
         int selection = -1;
         do {
             while (!myScanner.hasNextInt()) {
                 myScanner.next();
-                System.out.println("Enter the number that corresponds to your menu selection: ");
+                if (myScanner.hasNextLine()){
+                    System.out.println("Enter the number that corresponds to your menu selection: ");
+                }
             }
             selection = myScanner.nextInt();
+            if(selection > maxVal || selection < minVal){
+                System.out.println("Enter the number that corresponds to your menu selection: ");
+            }
         } while (selection > maxVal || selection < minVal);
-        return selection;
-    } */
-
-    public static int validateMenuSelection(int minVal, int maxVal){
-        int selection = -1;
-        while (selection > maxVal || selection < minVal){
-            while (!myScanner.hasNextInt()) {
-                myScanner.next();
-                System.out.println("Enter the number that corresponds to your menu selection: ");
-            }
-            selection = myScanner.nextInt();
-        }
         return selection;
     }
 
@@ -339,13 +331,14 @@ public class ReadingBuddy {
                     System.out.println("\tRating: " + ((currentUser.getReadBooks().get(i-1).getRating() != -1) ? currentUser.getReadBooks().get(i-1).getRating() + "/10" : "-"));
                     System.out.println((""));
                 }
-                System.out.println("\nTo rate a book, enter the corresponding number\nor enter 0 to return to the My Books Menu");
+                System.out.print("\nTo rate a book, enter the corresponding number or enter 0 to return to the My Books Menu: ");
                 numSelected = validateMenuSelection(0, currentUser.getReadBooks().size());
+                System.out.println("");
                 if (numSelected == 0){
                     stayReadBooks = false;
                 } else {
                     selectedBook = currentUser.getReadBooks().get(numSelected-1);
-                    selectedBook.rateBook();
+                    selectedBook.rateBook(myScanner);
                     updateReadBookRating(selectedBook);
                     //ADD rating to file data
                 }

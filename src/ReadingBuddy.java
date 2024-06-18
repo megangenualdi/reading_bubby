@@ -65,9 +65,6 @@ public class ReadingBuddy {
 
     //gather all current book file entries
     public static void getAllCurrentBooksData(){
-        //TESTING
-        System.out.println("In the getting data func");
-
         try { 
             // Create an object of file reader class with CSV file as a parameter. 
             FileReader filereader = new FileReader("reading_bubby/appdata/currently_reading.csv"); 
@@ -317,7 +314,7 @@ public class ReadingBuddy {
         int i;
         ReadBook selectedBook;
         while (stayReadBooks){
-            System.out.println("Read Books Manager\n");
+            System.out.println("\n\nRead Books Manager\n");
             //if user has no current books send them back to books menu
             if (currentUser.getReadBooks().size() < 1){
                 System.out.println("You have no read books yet. Returning to My Books Menu");
@@ -330,14 +327,13 @@ public class ReadingBuddy {
                     System.out.println("\tRating: " + ((currentUser.getReadBooks().get(i-1).getRating() != -1) ? currentUser.getReadBooks().get(i-1).getRating() + "/10" : "-"));
                     System.out.println((""));
                 }
-                System.out.println("To rate or re-rate a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0");
+                System.out.println("\nTo rate or a book, enter the corresponding number.\nEnter 0 to return to the Books Menu");
                 numSelected = validateMenuSelection(0, currentUser.getReadBooks().size());
                 if (numSelected == 0){
                     stayReadBooks = false;
                 } else {
                     selectedBook = currentUser.getReadBooks().get(numSelected-1);
-                    System.out.println("\nRate the book with any (whole) number from 1 to 10. Enter 0 to exit without rating");
-                    selectedBook.rateBook(myScanner);
+                    selectedBook.rateBook();
                     updateReadBookRating(selectedBook);
                     //ADD rating to file data
                 }
@@ -489,11 +485,11 @@ public class ReadingBuddy {
             
                 case 2:
                     searchForBookBuddyMenu();
-                    System.out.println("Book Buddies coming soon!");
+                    System.out.println("\nBook Buddies coming soon!\n\n");
                     break;
 
                 case 3:
-                    System.out.println("Book Groups coming soon!");
+                    System.out.println("\nBook Groups coming soon\n\n!");
                     break;
                 
                 case 4:

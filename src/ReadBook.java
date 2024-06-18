@@ -50,7 +50,7 @@ public class ReadBook extends Book {
     public int validateNumber(int minVal, int maxVal, Scanner myScanner){
         int selection = -1;
         do {
-            System.out.print("Enter a number from " + minVal + " to " + maxVal + ": ");
+            //System.out.print("Enter a number from " + minVal + " to " + maxVal + ": ");
             while (!myScanner.hasNextInt()) {
                 myScanner.next();
                 System.out.println("Enter a number from " + minVal + " to " + maxVal + ": ");

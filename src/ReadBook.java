@@ -40,7 +40,8 @@ public class ReadBook extends Book {
     //QUESTION: will this update that ReadBook's rating in both the user's readBooks ArrayList AND the allReadBooks ArrayList
     public void rateBook(){
         Scanner myScanner = new Scanner(System.in);
-        System.out.println("Rating " +  super.getTitle() + " by " + super.getAuthor() + ":\n");
+        System.out.println("\nRating " +  super.getTitle() + " by " + super.getAuthor() + ":\n");
+        System.out.print("Rate the book from 1 to 10, or enter 0 to exit without rating:");
         //0 exits because nothing happens
         int numSelected = validateNumber(0, 10, myScanner);
         if(numSelected != 0){
@@ -52,7 +53,7 @@ public class ReadBook extends Book {
     public int validateNumber(int minVal, int maxVal, Scanner myScanner){
         int selection = -1;
         do {
-            System.out.print("Enter a number from " + minVal + " to " + maxVal + ": ");
+            //System.out.print("Enter a number from " + minVal + " to " + maxVal + ": ");
             while (!myScanner.hasNextInt()) {
                 myScanner.next();
                 System.out.println("Enter a number from " + minVal + " to " + maxVal + ": ");

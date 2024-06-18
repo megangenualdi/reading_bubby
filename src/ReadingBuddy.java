@@ -42,7 +42,7 @@ public class ReadingBuddy {
         while (selection > maxVal || selection < minVal){
             while (!myScanner.hasNextInt()) {
                 myScanner.next();
-                System.out.println("Enter the number that corresponds to your menu selection: ");
+                System.out.println("\nEnter the number that corresponds to your menu selection: ");
             }
             selection = myScanner.nextInt();
         }
@@ -339,13 +339,13 @@ public class ReadingBuddy {
                     System.out.println("\tRating: " + ((currentUser.getReadBooks().get(i-1).getRating() != -1) ? currentUser.getReadBooks().get(i-1).getRating() + "/10" : "-"));
                     System.out.println((""));
                 }
-                System.out.println("\nTo rate a book, enter the corresponding number\nor enter 0 to return to the My Books Menu");
+                System.out.print("\nTo rate a book, enter the corresponding number\nor enter 0 to return to the My Books Menu: ");
                 numSelected = validateMenuSelection(0, currentUser.getReadBooks().size());
                 if (numSelected == 0){
                     stayReadBooks = false;
                 } else {
                     selectedBook = currentUser.getReadBooks().get(numSelected-1);
-                    selectedBook.rateBook();
+                    selectedBook.rateBook(myScanner);
                     updateReadBookRating(selectedBook);
                     //ADD rating to file data
                 }

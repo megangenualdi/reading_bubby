@@ -18,10 +18,11 @@ public class ReadingBuddy {
     //VARIABLES TO HOLD DATA FOR "SESSION"
     //track the next id to be assigned to new users, new books, new groups (that is their order in the array)
     static ArrayList<Integer> nextUserBookGroup = new ArrayList<Integer>();
-    static User currentUser;
+    static User currentUser = new User(-1, null);
     static ArrayList<Book> allBooks = new ArrayList<Book>();
     static ArrayList<CurrentBook> allCurrentBooks = new ArrayList<CurrentBook>();
     static ArrayList<ReadBook> allReadBooks = new ArrayList<ReadBook>();
+    static boolean isLoggedIn = false;
 
     //INPUT VALIDATION (and helpers)
     public static int validateMenuSelection(int minVal, int maxVal){
@@ -44,11 +45,12 @@ public class ReadingBuddy {
     //asks a yes/no question and returns the answer
     public static int confirmSelection(String question){
         System.out.println(question);
-        System.out.println("1. Yes\n2. No");
+        System.out.print("1. Yes\n2. No\nSelection: ");
         int selection = validateMenuSelection(1, 2);
         return selection;
     }
 
+    //check for strings that are empty or only whitespace
     public static String checkStrInput(String prompt){
         System.out.print("\n" + prompt);
         String userInput = myScanner.nextLine();
@@ -63,6 +65,37 @@ public class ReadingBuddy {
         }
         return userInput;
     }
+
+        //get+validate username or password - no whitespace allowed 
+        //(whatEntered can be username or password (or anything else that fits this syntax))
+        public static String validateInputNoSpaces(String prompt, String whatEntered){
+            boolean isValid = false;
+            System.out.print(prompt);
+            String userInput = myScanner.nextLine();
+            //accounting for scanner sometimes but not always coming off reading an int--will only reprompt user if 
+            //USER themself enters nothing or only whitespace
+            if(userInput.isBlank()){
+                userInput = myScanner.nextLine();
+            }
+            isValid = checkCharsForSpace(userInput);
+            while(userInput.isBlank() || !isValid){
+                System.out.println("\nThe " + whatEntered + " entered contains whitespace.");
+                System.out.print("Enter a " + whatEntered + " without any spaces: ");
+                userInput = myScanner.nextLine();
+                isValid = checkCharsForSpace(userInput);
+            }
+            return userInput;
+        }
+    
+        //return true if valid username, false if contains whitespace
+        public static boolean checkCharsForSpace(String toCheck){
+            for(int i = 0; i < toCheck.length(); i++){
+                if(Character.isWhitespace(toCheck.charAt(i))){
+                    return false;
+                }
+            }
+            return true;
+        }    
 
     //FUNCTIONS FOR GETTING DATA AT LOGIN (the ones not belonging to User)
     public static void getNextIds(){
@@ -80,6 +113,27 @@ public class ReadingBuddy {
         catch (Exception e) { 
             e.printStackTrace(); 
         }
+    }
+
+    public static ArrayList<String[]> getAllUserData(){
+        ArrayList<String[]> allUsers = new ArrayList<String[]>();
+        try { 
+            // Create an object of file reader class with CSV file as a parameter. 
+            FileReader filereader = new FileReader("reading_bubby/appdata/users.csv"); 
+            // create csvReader object and skip first Line 
+            CSVReader csvReader = new CSVReaderBuilder(filereader) 
+                                      .withSkipLines(1) 
+                                      .build(); 
+            List<String[]> allData = csvReader.readAll(); 
+            for (String[] row : allData) {
+                allUsers.add(row);
+            }
+            return allUsers;
+        } 
+        catch (Exception e) { 
+            e.printStackTrace();
+        } 
+        return allUsers;
     }
 
     //gather all current book file entries
@@ -157,8 +211,9 @@ public class ReadingBuddy {
                     //FOR TESTING
                     System.out.println("index of current book to delete: " + Integer.toString(idxForUserArr));
 
-                    //when the selected book is found do not write it to the data but remove it from the ArrayList
-                    currentUser.removeCurrentBook(idxForUserArr);
+                    //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allCurrentBooks Arraylist
+                    currentUser.removeFromCurrentlyReading(idxForUserArr);
+                    allCurrentBooks.remove(x);
                 } else {
                     data.add(new String[] {Integer.toString(allCurrentBooks.get(x).getID()), 
                         allCurrentBooks.get(x).getTitle(), allCurrentBooks.get(x).getAuthor(), 
@@ -225,8 +280,46 @@ public class ReadingBuddy {
         } 
     }
 
+    public static ArrayList<String[]> addNewUserData(String uname, String pw, ArrayList<String[]> allUsers){
+        try{
+            FileWriter filewriter = new FileWriter("reading_bubby/appdata/users.csv", true);
+            CSVWriter writer = new CSVWriter(filewriter);
+            String[] userInfo = {Integer.toString(nextUserBookGroup.get(0)), uname, pw};
+            writer.writeNext(userInfo);
+            writer.close();
+            allUsers.add(userInfo);
+            System.out.println("Your account has been added!\n");
+            //increment user number
+            incrementNextIdNums(0);
+            return allUsers;
+        }
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+        return allUsers;
+    }
 
     //MENU FUNCTIONS
+
+    public static void manageEntry(){
+        //arraylist below will hold arrays with userID, username, password (all would not be pulled into program in using actual DB)
+        ArrayList<String[]> allUsers = getAllUserData();
+
+        while (currentUser.getID() == -1 || !isLoggedIn){
+            System.out.println("""
+                    Enter the number corresponding to your menu selection:\n
+                    1. Login
+                    2. Create an Account
+                    """);
+            int menuSelection = validateMenuSelection(1, 2);
+            if(menuSelection == 1){
+                login(allUsers);
+            } else {
+                allUsers = createNewAccount(allUsers);
+            }
+        }
+    }
+
     public static int mainMenu(){
         System.out.println("Main Menu:\n");
         System.out.println("1. Manage My Books\n2. Search For A Book Buddy!\n3. View Book Buddies/Book Groups\n4. Exit\n");
@@ -306,7 +399,7 @@ public class ReadingBuddy {
                     //give user options for selected book
                     selectedBook = currentUser.getCurrentlyReading().get(numSelected-1);
                     System.out.println("\nYou have selected " + selectedBook.getTitle() + " by " +
-                    selectedBook.getAuthor());
+                    selectedBook.getAuthor() + ":\n");
                     System.out.println("""
                         Enter 1 to mark book as read\n
                         Enter 2 to remove book from Currently Reading\n
@@ -314,11 +407,19 @@ public class ReadingBuddy {
                     int num2Selected = validateMenuSelection(1, 3);
                     if(num2Selected == 1){
                         //add to read books then remove from current
-                        currentUser.addToReadBooks(selectedBook);
-                        removeCurrentBook(numSelected-1, selectedBook);
+                        boolean alreadyInRead = currentUser.checkIfInReadBooks(selectedBook.getID());
+                        if(!alreadyInRead){
+                            ReadBook toAdd = new ReadBook(selectedBook.getID(), selectedBook.getTitle(), selectedBook.getAuthor(), 
+                            currentUser.getUsername());
+                            currentUser.addToReadBooks(toAdd);
+                            allReadBooks.add(toAdd);
+                        } else {
+                            System.out.println("\n" + selectedBook.getTitle() + " is already in your Read Books\n");
+                        }
+                        removeCurrentBook((numSelected-1), selectedBook);
                         //later will need to add more to preserve and update group relationship
                     } else if(num2Selected == 2){
-                        removeCurrentBook(numSelected-1, selectedBook);
+                        removeCurrentBook((numSelected-1), selectedBook);
                         //!!!later will need to add more to deal with potential group membership
                     }
                     //if 3 loop will just keep going
@@ -374,8 +475,15 @@ public class ReadingBuddy {
                 Enter the number that corresponds to your menu selection:
                 """);
             int menuSelection = validateMenuSelection(1, 3);
+
+
+            //FOR TESTING
+            System.out.println("menu selection = " + menuSelection);
+
             Book bookToAdd;
+            CurrentBook toAdd;
             int confirmation;
+            boolean alreadyInCurrentBooks;
             if(menuSelection == 1){
                 //for now leaving old (but working) input areas commented out and can remove all commented out later
                 /* System.out.println("\nEnter the book's title:\n");
@@ -395,8 +503,18 @@ public class ReadingBuddy {
                     } else {
                         bookToAdd = searchMatches.get(0);
                     }//will add other else to manage searches with multiple matches when adding search by only title or author/current else will become "else if(searchMatches.size()==1)"
-                    //add to currently reading
-                    currentUser.addToCurrentlyReading(bookToAdd);
+                    
+                    //add to currently reading + check if in currently reading
+                    alreadyInCurrentBooks = currentUser.checkIfInCurrentBooks(bookToAdd.getID());
+                    if (alreadyInCurrentBooks){
+                        System.out.println("\n" + bookToAdd.getTitle() + " by " + bookToAdd.getAuthor() + 
+                            "is already in your Currently Reading\n");
+                    } else {
+                        //otherwise add it to currently reading in book obj AND currentlyReading arraylist
+                        toAdd = new CurrentBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), currentUser.getUsername());
+                        allCurrentBooks.add(toAdd);
+                        currentUser.addToCurrentlyReading(toAdd);
+                    }
                 }
             } else if (menuSelection == 2){
                 System.out.println("\n\nSelect a book from the following menu, or enter 0 to go back.\n");
@@ -411,7 +529,15 @@ public class ReadingBuddy {
                     confirmation = confirmSelection(("\nAdd " + bookToAdd.getTitle() + " by " + 
                         bookToAdd.getAuthor() + " to your Currently Reading?"));
                     if(confirmation == 1){
-                        currentUser.addToCurrentlyReading(bookToAdd);
+                        alreadyInCurrentBooks = currentUser.checkIfInCurrentBooks(bookToAdd.getID());
+                        if (alreadyInCurrentBooks){
+                            System.out.println("\n" + bookToAdd.getTitle() + " by " + bookToAdd.getAuthor() + 
+                            "is already in your Currently Reading");
+                        } else {
+                            toAdd = new CurrentBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), currentUser.getUsername());
+                            allCurrentBooks.add(toAdd);
+                            currentUser.addToCurrentlyReading(toAdd);
+                        }
                     }
                 }
             } else {
@@ -454,45 +580,91 @@ public class ReadingBuddy {
     }
 
     //ADD USER
-    public static void addNewUser(String uname, String pw){
-        //ADD CHECK FOR MATCHING USERNAMES IN OTHER FUNCTION
-        try{
-            FileWriter filewriter = new FileWriter("reading_bubby/appdata/users.csv", true);
-            CSVWriter writer = new CSVWriter(filewriter);
-            String[] userInfo = {Integer.toString(nextUserBookGroup.get(0)), uname, pw};
-            writer.writeNext(userInfo);
-            writer.close();
-            System.out.println("Your account has been added");
-            //increment user number
-            incrementNextIdNums(0);
+    //return false if match, return true if available
+    public static boolean checkUsernameAvailability(String userName, ArrayList<String[]> usersList){
+        for(int i = 0; i < usersList.size(); i++){
+            if(usersList.get(i)[1].equals(userName.toLowerCase())){
+                System.out.println("The username \"" + userName + "\" is already taken");
+                return false;
+            }
         }
-        catch (IOException e) { 
-            e.printStackTrace(); 
-        } 
+        return true;
+    }
+
+    public static ArrayList<String[]> createNewAccount(ArrayList<String[]> usersList){
+        String userName = "";
+        boolean isAvailable = false;
+        while (!isAvailable) {
+            userName = validateInputNoSpaces("Enter the username you want (usernames cannot contain spaces): ", "username");
+            isAvailable = checkUsernameAvailability(userName, usersList);
+        }
+        //once valid username enter a password
+        String pw = validateInputNoSpaces("Enter a password (passwords cannot contain spaces): ", "password");
+        String confirmationQuestion = "Create account with username \"" + userName + "\"?";
+        int createAcct = confirmSelection(confirmationQuestion);
+        if(createAcct == 1){
+            usersList = addNewUserData(userName, pw, usersList);
+        }
+        return usersList;
+    }
+
+    //LOGIN
+    public static void login(ArrayList<String[]> usersList){
+        boolean keepTrying = true;
+        String username;
+        String password;
+        int userIdNum;
+        while (keepTrying) {
+            //because an integer was the last thing entered via scanner must skip to next line
+            myScanner.nextLine();
+            System.out.print("\nUsername: ");
+            username = myScanner.nextLine();
+            System.out.print("\nPassword: ");
+            password = myScanner.nextLine();
+            userIdNum = checkLoginInfo(username, password, usersList);
+            if(userIdNum > 0){
+                currentUser = new User(userIdNum, username);
+                isLoggedIn = true;
+                keepTrying = false;
+            } else {
+                System.out.println("Incorrect username and/or password");
+                int yesOrNo = confirmSelection("Would you like to try logging in again?");
+                if (yesOrNo == 2) {
+                    keepTrying = false;
+                }
+            }
+        }
+    }
+
+    public static int checkLoginInfo(String userName, String pw, ArrayList<String[]> allUsers){
+        for(int i = 0; i < allUsers.size(); i++){
+            if(allUsers.get(i)[1].equals(userName) && allUsers.get(i)[2].equals(pw)){
+                return Integer.parseInt(allUsers.get(i)[0]);
+            }
+        }
+        return -1;
     }
 
     public static void main(String[] args){
-        //data gathering to happen before login, once login implemented
+        //data gathering to happen before login
         getNextIds();
         getAllBooks();
-    
+
+        //this runs a loop that will prevent anything below from running until user logged in
+        manageEntry();
+
+        //once user logged in pull in all the relevant info for user
         getAllReadBooksData();
         getAllCurrentBooksData();
 
-         //once user logged in pull in all the relevant info for user
-        //HARDCODED FOR NOW
-        currentUser = new User(1, "tester1");
-        currentUser.initialSetCurrentlyReading(allCurrentBooks);
-        currentUser.initialSetReadBooks(allReadBooks);
-
-        if (currentUser.getID() > 0 && currentUser.getUsername() != null){
-            //ADD GREET USER - That might come from Megan in the Design spec?
-            System.out.println("Hello " + currentUser.getUsername() + "!\n");
+        //post-login code that only runs once (and thus not iin the main menu loop)
+        if (currentUser.getID() > 0 && isLoggedIn){
+            System.out.println("\n\n\nHello " + currentUser.getUsername() + "!\n");
+            currentUser.initialSetCurrentlyReading(allCurrentBooks);
+            currentUser.initialSetReadBooks(allReadBooks);
         }
 
-        boolean isLoggedIn = true;
         int mainMenuSelection;//to hold number representing which menu choice user has made
-
         //Loop that constitutes being logged in and will keep returning user to main menu unless log out
         do{
             mainMenuSelection = mainMenu();
@@ -516,7 +688,5 @@ public class ReadingBuddy {
             }
         }
         while(isLoggedIn);
-        
-
     }
 }

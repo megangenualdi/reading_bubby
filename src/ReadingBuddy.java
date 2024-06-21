@@ -208,9 +208,6 @@ public class ReadingBuddy {
             data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy"});
             for(int x = 0; x < allCurrentBooks.size(); x++){
                 if((toRemove.getID() == allCurrentBooks.get(x).getID()) && (toRemove.getUsername().equals(allCurrentBooks.get(x).getUsername()))){
-                    //FOR TESTING
-                    System.out.println("index of current book to delete: " + Integer.toString(idxForUserArr));
-
                     //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allCurrentBooks Arraylist
                     currentUser.removeFromCurrentlyReading(idxForUserArr);
                     allCurrentBooks.remove(x);
@@ -334,8 +331,8 @@ public class ReadingBuddy {
         while (stayBooksMenu){
             System.out.println("\nMy Books Menu:\n");
             System.out.println("""
-                1. View and Update Currently Reading\n
-                2. Add a Book to Currently Reading\n
+                1. View and Manage Currently Reading Books\n
+                2. Add a Book to Currently Reading List\n
                 3. View Finished Books\n
                 4. Return to Main Menu\n""");
             System.out.print("Enter the number that corresponds to your menu selection: ");
@@ -390,7 +387,7 @@ public class ReadingBuddy {
                     }
                     System.out.println((""));
                 }
-                System.out.println("To mark a book as finished or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0");
+                System.out.print("To mark a book as finished or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0: ");
                 numSelected = validateMenuSelection(0, currentUser.getCurrentlyReading().size());
                 if(numSelected == 0){
                     //if select exit change LCV
@@ -401,9 +398,11 @@ public class ReadingBuddy {
                     System.out.println("\nYou have selected " + selectedBook.getTitle() + " by " +
                     selectedBook.getAuthor() + ":\n");
                     System.out.println("""
-                        Enter 1 to mark book as read\n
-                        Enter 2 to remove book from Currently Reading\n
-                        Or enter 3 to return to the Currently Reading Manager""");
+                        1. Mark Book as Read
+                        2. Remove book from Currently Reading
+                        3. Return to the Currently Reading Menu\n
+                        Enter the number that corresponds to your menu selection: 
+                        : """);
                     int num2Selected = validateMenuSelection(1, 3);
                     if(num2Selected == 1){
                         //add to read books then remove from current
@@ -420,6 +419,7 @@ public class ReadingBuddy {
                         //later will need to add more to preserve and update group relationship
                     } else if(num2Selected == 2){
                         removeCurrentBook((numSelected-1), selectedBook);
+                        System.out.println("\n" + selectedBook.getTitle() + " has been removed from your Currently Reading\n");
                         //!!!later will need to add more to deal with potential group membership
                     }
                     //if 3 loop will just keep going
@@ -476,25 +476,13 @@ public class ReadingBuddy {
                 """);
             int menuSelection = validateMenuSelection(1, 3);
 
-
-            //FOR TESTING
-            System.out.println("menu selection = " + menuSelection);
-
             Book bookToAdd;
             CurrentBook toAdd;
             int confirmation;
             boolean alreadyInCurrentBooks;
             if(menuSelection == 1){
-                //for now leaving old (but working) input areas commented out and can remove all commented out later
-                /* System.out.println("\nEnter the book's title:\n");
-                myScanner.nextLine();
-                String title = myScanner.nextLine(); */
-                /* System.out.println("Enter the name of the book's author:\n");
-                String author = myScanner.nextLine(); */
                 String title = checkStrInput("Enter the book's title:");
-                System.out.println("printning title = " + title + " to see where lag/extra return is coming from");
                 String author = checkStrInput("Enter the name of the book's author:\n");
-
                 confirmation = confirmSelection(("\nAdd " + title + " by " + author + " to your Currently Reading?"));
                 if(confirmation == 1){
                     ArrayList<Book> searchMatches = searchAllBooks(title, author);
@@ -517,7 +505,7 @@ public class ReadingBuddy {
                     }
                 }
             } else if (menuSelection == 2){
-                System.out.println("\n\nSelect a book from the following menu, or enter 0 to go back.\n");
+                System.out.println("\n\nSelect a book from the following menu, or enter 0 to go back:\n");
                 for(int x = 0; x < allBooks.size(); x++){
                     System.out.println((x+1) + ". " + allBooks.get(x).getTitle() + " by " + 
                     allBooks.get(x).getAuthor());
@@ -570,8 +558,6 @@ public class ReadingBuddy {
             String[] bookInfo = {Integer.toString(bookToAdd.getID()), bookToAdd.getTitle(), bookToAdd.getAuthor()};
             writer.writeNext(bookInfo);
             writer.close();
-            //REMOVE LATER - FOR CHECKING
-            System.out.println("\n" + bookToAdd.getTitle() + " has been added to books list");
         }
         catch (IOException e) { 
             e.printStackTrace(); 
@@ -595,7 +581,7 @@ public class ReadingBuddy {
         String userName = "";
         boolean isAvailable = false;
         while (!isAvailable) {
-            userName = validateInputNoSpaces("Enter the username you want (usernames cannot contain spaces): ", "username");
+            userName = validateInputNoSpaces("Enter the username you would like (usernames cannot contain spaces): ", "username");
             isAvailable = checkUsernameAvailability(userName, usersList);
         }
         //once valid username enter a password
@@ -674,7 +660,6 @@ public class ReadingBuddy {
                     break;
             
                 case 2:
-                    //searchForBookBuddyMenu();
                     System.out.println("\nBook Buddies coming soon!\n\n");
                     break;
 

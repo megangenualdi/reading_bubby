@@ -58,15 +58,8 @@ public class User {
     }
 
     public void addToCurrentlyReading(CurrentBook bookToAdd){
-        
-        //FOR TESTING
-        System.out.println("currently reading before add: " + currentlyReading.size());
-
         currentlyReading.add(bookToAdd);
         addToCurrentlyReadingCsv(bookToAdd);
-
-        //FOR TESTING
-        System.out.println("currently reading after add: " + currentlyReading.size());
     }
 
     public boolean checkIfInCurrentBooks(int idToCheck){
@@ -129,8 +122,6 @@ public class User {
         return false;
     }
 
-
-    //DEAL WITH THIS
     public void removeFromCurrentlyReading(int idx){
        currentlyReading.remove(idx);
     }

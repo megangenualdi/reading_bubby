@@ -322,7 +322,7 @@ public class ReadingBuddy {
 
     public static int mainMenu(){
         System.out.println("Main Menu:\n");
-        System.out.println("1. Manage My Books\n2. Search For A Book Buddy!\n3. View Book Buddies/Book Groups\n4. Exit\n");
+        System.out.println("1. Manage My Books\n2. Find a Book Buddy!\n3. Manage Book Buddies & Groups\n4. Exit\n");
         System.out.print("Enter the number that corresponds to your menu selection: ");
         int selectedOption = validateMenuSelection(1, 4);
         return selectedOption;
@@ -679,7 +679,7 @@ public class ReadingBuddy {
                     break;
 
                 case 3:
-                    System.out.println("\nBook Groups coming soon\n\n!");
+                    System.out.println("\nIn development--Book Groups coming soon\n\n!");
                     break;
                 
                 case 4:

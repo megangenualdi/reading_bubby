@@ -23,7 +23,7 @@ public class ReadingBuddy {
     static ArrayList<CurrentBook> allCurrentBooks = new ArrayList<CurrentBook>();
     static ArrayList<ReadBook> allReadBooks = new ArrayList<ReadBook>();
 
-
+    //INPUT VALIDATION (and helpers)
     public static int validateMenuSelection(int minVal, int maxVal){
         int selection = -1;
         do {
@@ -47,6 +47,21 @@ public class ReadingBuddy {
         System.out.println("1. Yes\n2. No");
         int selection = validateMenuSelection(1, 2);
         return selection;
+    }
+
+    public static String checkStrInput(String prompt){
+        System.out.print("\n" + prompt);
+        String userInput = myScanner.nextLine();
+        //accounting for scanner sometimes but not always coming off reading an int--will only reprompt user if 
+        //USER themself enters nothing or only whitespace
+        if(userInput.isBlank()){
+            userInput = myScanner.nextLine();
+        }
+        while(userInput.isBlank()){
+            System.out.print(prompt);
+            userInput = myScanner.nextLine();
+        }
+        return userInput;
     }
 
     //FUNCTIONS FOR GETTING DATA AT LOGIN (the ones not belonging to User)
@@ -253,9 +268,10 @@ public class ReadingBuddy {
         }
     }
 
-    public static void searchForBookBuddyMenu(){
+//To add later
+/*     public static void searchForBookBuddyMenu(){
 
-    }
+    } */
 
     public static void manageCurrentBooks(){
         //menu of currently reading books with action options that loops until exit
@@ -350,7 +366,7 @@ public class ReadingBuddy {
         boolean stayInMenu = true;
         while(stayInMenu){
             //CAN ADD SEARCH BOOKS (by title and/or author) LATER
-            System.out.println("""
+            System.out.print("""
                 \n
                 1. Enter a book (title and author)\n
                 2. Select a book from our list of books\n
@@ -361,13 +377,15 @@ public class ReadingBuddy {
             Book bookToAdd;
             int confirmation;
             if(menuSelection == 1){
-                System.out.println("\nEnter the book's title:\n");
+                //for now leaving old (but working) input areas commented out and can remove all commented out later
+                /* System.out.println("\nEnter the book's title:\n");
                 myScanner.nextLine();
-                String title = myScanner.nextLine();
-                //ADD VALIDATION TO CHECK FOR INPUT THAT IS ONLY WHITE SPACE
-                System.out.println("Enter the name of the book's author:\n");
-                String author = myScanner.nextLine();
-                //ADD VALIDATION TO CHECK FOR INPUT THAT IS ONLY WHITE SPACE
+                String title = myScanner.nextLine(); */
+                /* System.out.println("Enter the name of the book's author:\n");
+                String author = myScanner.nextLine(); */
+                String title = checkStrInput("Enter the book's title:");
+                System.out.println("printning title = " + title + " to see where lag/extra return is coming from");
+                String author = checkStrInput("Enter the name of the book's author:\n");
 
                 confirmation = confirmSelection(("\nAdd " + title + " by " + author + " to your Currently Reading?"));
                 if(confirmation == 1){
@@ -427,7 +445,7 @@ public class ReadingBuddy {
             writer.writeNext(bookInfo);
             writer.close();
             //REMOVE LATER - FOR CHECKING
-            System.out.println(bookToAdd.getTitle() + " has been added to books list");
+            System.out.println("\n" + bookToAdd.getTitle() + " has been added to books list");
         }
         catch (IOException e) { 
             e.printStackTrace(); 
@@ -472,11 +490,6 @@ public class ReadingBuddy {
             System.out.println("Hello " + currentUser.getUsername() + "!\n");
         }
 
-        //REMOVE LATER/ TESTING TO SEE WHAT IS HAPPENING WITH DATA
-        //for(int i = 0; i < currentUser.getCurrentlyReading().size(); i++){
-          //  System.out.println(currentUser.getCurrentlyReading().get(i).getTitle());
-        //}
-
         boolean isLoggedIn = true;
         int mainMenuSelection;//to hold number representing which menu choice user has made
 
@@ -489,7 +502,7 @@ public class ReadingBuddy {
                     break;
             
                 case 2:
-                    searchForBookBuddyMenu();
+                    //searchForBookBuddyMenu();
                     System.out.println("\nBook Buddies coming soon!\n\n");
                     break;
 

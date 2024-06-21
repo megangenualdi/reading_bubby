@@ -57,37 +57,27 @@ public class User {
         return currentlyReading;
     }
 
-    public void addToCurrentlyReading(Book bookToAdd){
-        boolean inCurrentBooks = checkIfInCurrentBooks(bookToAdd.getID());
-        if(!inCurrentBooks){
-            CurrentBook toAdd = new CurrentBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), username);
-            
-            //FOR TESTING
-            System.out.println("currently reading before add: " + currentlyReading.size());
+    public void addToCurrentlyReading(CurrentBook bookToAdd){
+        
+        //FOR TESTING
+        System.out.println("currently reading before add: " + currentlyReading.size());
 
-            currentlyReading.add(toAdd);
-            addToCurrentlyReadingCsv(toAdd);
+        currentlyReading.add(bookToAdd);
+        addToCurrentlyReadingCsv(bookToAdd);
 
-            //FOR TESTING
-            System.out.println("currently reading after add: " + currentlyReading.size());
-
-        } else {
-            System.out.println("\n" + bookToAdd.getTitle() + " by " + bookToAdd.getAuthor() + 
-                "is already in your Currently Reading");
-        }
+        //FOR TESTING
+        System.out.println("currently reading after add: " + currentlyReading.size());
     }
 
     public boolean checkIfInCurrentBooks(int idToCheck){
-        boolean inCurrent = false;
         if(currentlyReading.size() > 0){
             for(int i = 0; i < currentlyReading.size(); i++){
                 if(idToCheck == currentlyReading.get(i).getID()){
-                    inCurrent = true;
+                    return true;
                 }
             }
         }
-        System.out.println("in current:" + inCurrent);
-        return inCurrent;
+        return false;
     }
 
     public void addToCurrentlyReadingCsv(CurrentBook bookToAdd){
@@ -109,14 +99,9 @@ public class User {
         return readBooks;
     }
 
-    public void addToReadBooks(CurrentBook bookToAdd){
-        //check if already in read books list
-        boolean inReadBooks = checkIfInReadBooks(bookToAdd.getID());
-        if(!inReadBooks){
-            ReadBook toAdd = new ReadBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), username);
-            readBooks.add(toAdd);
-            addToReadBooksCsv(toAdd);
-        }
+    public void addToReadBooks(ReadBook bookToAdd){
+        readBooks.add(bookToAdd);
+        addToReadBooksCsv(bookToAdd);
     }
 
     public void addToReadBooksCsv(ReadBook bookToAdd){
@@ -134,20 +119,19 @@ public class User {
     }
 
     public boolean checkIfInReadBooks(int bookIdToCheck){
-        boolean inReadBooks = false;
         if(readBooks.size() > 0){
             for(int i = 0; i < readBooks.size(); i++){
                 if(bookIdToCheck == readBooks.get(i).getID()){
-                    inReadBooks = true;
+                    return true;
                 }
             }
         }
-        return inReadBooks;
+        return false;
     }
 
 
     //DEAL WITH THIS
-    public void removeCurrentBook(int idx){
+    public void removeFromCurrentlyReading(int idx){
        currentlyReading.remove(idx);
     }
 

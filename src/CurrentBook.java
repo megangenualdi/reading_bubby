@@ -7,6 +7,7 @@ public class CurrentBook extends Book{
     private int currentChapter;
     private int groupID;
     private String bookBuddy;
+    private boolean hasOpenSearch;
     
     public CurrentBook(int id, String t, String a, String uName){
         super(id, t, a);
@@ -15,15 +16,17 @@ public class CurrentBook extends Book{
         currentChapter = -1; //-1 means do not show chapter unless set
         groupID = -1;//-1 indicates no group
         bookBuddy = null;
+        hasOpenSearch = false;
     }
 
-    public CurrentBook(int id, String t, String a, String uName, int cpage, int cch, int g, String bb){
+    public CurrentBook(int id, String t, String a, String uName, int cpage, int cch, int g, String bb, boolean openSearch){
         super(id, t, a);
         username = uName;
         currentPage = cpage;
         currentChapter = cch;
         groupID = g;
         bookBuddy = bb;
+        hasOpenSearch = false;
     }
 
     public String getUsername(){
@@ -62,5 +65,17 @@ public class CurrentBook extends Book{
         if (bookBuddy == null){
             bookBuddy = bbUsername;
         }
+    }
+
+    public void setSearchPostOn(){
+        hasOpenSearch = true;
+    }
+
+    public void setSearchPostOff(){
+        hasOpenSearch = false;
+    }
+
+    public boolean getHasOpenSearch(){
+        return hasOpenSearch;
     }
 }

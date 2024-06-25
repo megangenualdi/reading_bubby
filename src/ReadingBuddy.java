@@ -9,6 +9,7 @@
 package reading_bubby.src;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.*;
 import com.opencsv.*;
 
@@ -23,6 +24,7 @@ public class ReadingBuddy {
     static ArrayList<CurrentBook> allCurrentBooks = new ArrayList<CurrentBook>();
     static ArrayList<ReadBook> allReadBooks = new ArrayList<ReadBook>();
     static boolean isLoggedIn = false;
+    static ArrayList<SearchPost> allSearchPosts = new ArrayList<SearchPost>();
 
     //INPUT VALIDATION (and helpers)
     public static int validateMenuSelection(int minVal, int maxVal){
@@ -66,36 +68,36 @@ public class ReadingBuddy {
         return userInput;
     }
 
-        //get+validate username or password - no whitespace allowed 
-        //(whatEntered can be username or password (or anything else that fits this syntax))
-        public static String validateInputNoSpaces(String prompt, String whatEntered){
-            boolean isValid = false;
-            System.out.print(prompt);
-            String userInput = myScanner.nextLine();
-            //accounting for scanner sometimes but not always coming off reading an int--will only reprompt user if 
-            //USER themself enters nothing or only whitespace
-            if(userInput.isBlank()){
-                userInput = myScanner.nextLine();
-            }
-            isValid = checkCharsForSpace(userInput);
-            while(userInput.isBlank() || !isValid){
-                System.out.println("\nThe " + whatEntered + " entered contains whitespace.");
-                System.out.print("Enter a " + whatEntered + " without any spaces: ");
-                userInput = myScanner.nextLine();
-                isValid = checkCharsForSpace(userInput);
-            }
-            return userInput;
+    //get+validate username or password - no whitespace allowed 
+    //(whatEntered can be username or password (or anything else that fits this syntax))
+    public static String validateInputNoSpaces(String prompt, String whatEntered){
+        boolean isValid = false;
+        System.out.print(prompt);
+        String userInput = myScanner.nextLine();
+        //accounting for scanner sometimes but not always coming off reading an int--will only reprompt user if 
+        //USER themself enters nothing or only whitespace
+        if(userInput.isBlank()){
+            userInput = myScanner.nextLine();
         }
-    
-        //return true if valid username, false if contains whitespace
-        public static boolean checkCharsForSpace(String toCheck){
-            for(int i = 0; i < toCheck.length(); i++){
-                if(Character.isWhitespace(toCheck.charAt(i))){
-                    return false;
-                }
+        isValid = checkCharsForSpace(userInput);
+        while(userInput.isBlank() || !isValid){
+            System.out.println("\nThe " + whatEntered + " entered contains whitespace.");
+            System.out.print("Enter a " + whatEntered + " without any spaces: ");
+            userInput = myScanner.nextLine();
+            isValid = checkCharsForSpace(userInput);
+        }
+        return userInput;
+    }
+
+    //return true if valid username, false if contains whitespace
+    public static boolean checkCharsForSpace(String toCheck){
+        for(int i = 0; i < toCheck.length(); i++){
+            if(Character.isWhitespace(toCheck.charAt(i))){
+                return false;
             }
-            return true;
-        }    
+        }
+        return true;
+    }    
 
     //FUNCTIONS FOR GETTING DATA AT LOGIN (the ones not belonging to User)
     public static void getNextIds(){
@@ -148,7 +150,7 @@ public class ReadingBuddy {
             List<String[]> allData = csvReader.readAll(); 
             CurrentBook tempCurrentBook;
             for (String[] row : allData) {
-                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7]);
+                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7], Boolean.parseBoolean(row[8]));
                 allCurrentBooks.add(tempCurrentBook);
             }
         } 
@@ -177,6 +179,25 @@ public class ReadingBuddy {
         } 
     }
 
+    public static void getAllSearchPosts(){
+        try { 
+            // Create an object of file reader class with CSV file as a parameter. 
+            FileReader filereader = new FileReader("reading_bubby/appdata/search_posts.csv"); 
+            // create csvReader object and skip first Line 
+            CSVReader csvReader = new CSVReaderBuilder(filereader) 
+                                      .withSkipLines(1) 
+                                      .build(); 
+            List<String[]> allData = csvReader.readAll(); 
+            SearchPost tempPost;
+            for (String[] row : allData) {
+                tempPost = new SearchPost(row[0], Integer.parseInt(row[1]), row[2], row[3], LocalDate.parse(row[4]));
+                allSearchPosts.add(tempPost);
+            }
+        } 
+        catch (Exception e) { 
+            e.printStackTrace();
+        } 
+    }
 
     public static void getAllBooks(){
         try {  
@@ -296,6 +317,41 @@ public class ReadingBuddy {
         return allUsers;
     }
 
+    public static void createNewBookGroup(SearchPost wantedPost){
+        BookGroup newGroup = new BookGroup(nextUserBookGroup.get(2), wantedPost, currentUser.getUsername());
+        currentUser.addBookGroup(newGroup);
+        try{
+            FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
+            CSVWriter writer = new CSVWriter(filewriter);
+            String[] groupInfo = {Integer.toString(nextUserBookGroup.get(2)), Integer.toString(wantedPost.getBookID()),
+                 wantedPost.getTitle(), wantedPost.getAuthor(), wantedPost.getPoster(), currentUser.getUsername(), 
+                 Integer.toString(0), Integer.toString(0)};
+            writer.writeNext(groupInfo);
+            writer.close();
+            incrementNextIdNums(2);
+            System.out.println("\nYou are now book buddies with [user] to read [title] by [author]!");
+        }
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+    }
+
+    public static void createNewSearchPost(Book toAdd){
+        SearchPost newPost = new SearchPost(currentUser.getUsername(), toAdd);
+        allSearchPosts.add(newPost);
+        try{
+            FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
+            CSVWriter writer = new CSVWriter(filewriter);
+            String[] postInfo = {currentUser.getUsername(), Integer.toString(newPost.getBookID()), newPost.getTitle(), newPost.getAuthor(), newPost.getWhenPosted().toString()};
+            writer.writeNext(postInfo);
+            writer.close();
+            System.out.println("\nYou are now book buddies with [user] to read [title] by [author]!");
+        }
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+    }
+
     //MENU FUNCTIONS
 
     public static void manageEntry(){
@@ -358,10 +414,64 @@ public class ReadingBuddy {
         }
     }
 
-//To add later
-/*     public static void searchForBookBuddyMenu(){
 
-    } */
+
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+
+
+    //IN PROGRESS
+    public static void searchForBookBuddyMenu(){
+        boolean stayInMenu = true;
+        while (stayInMenu) {
+            /*if 1:
+                -
+             * if 2:
+             *  -let select from currently reading
+             *  -show any postings for same book
+             *  -choose from existing (if any) OR create a post
+             * if 3:
+             * 
+             */
+            System.out.println("""
+                    Find Book Buddy Menu\n
+                    1. View Book Buddy Postings
+                    2. Make a \"Seeking Book Buddy\" Post
+
+                    Enter your selection from the menu, or enter 0 to return to the Main Menu:
+                    """);
+            int menuSelection = validateMenuSelection(0, 2);
+            if (menuSelection == 1) {
+                //ADD DISPLAY AND SELECT FUNCTION
+                System.out.print("\nEnter your selection from the menu, or enter 0 to return to the previous menu:");
+            } else if (menuSelection == 2){
+                makeSearchPostMenu();
+            } else {
+                stayInMenu = false;
+            }
+        }
+    }
+
+    //IN PROGRESS
+    public static void makeSearchPostMenu(){
+        System.out.println("""
+                    Book Buddy Post Menu\n
+                    1. Select a book from your currently reading
+                    2. Enter a book (title and author)
+                    3. Select a book from the list of books
+
+                    Enter your selection from the menu, or enter 0 to return to the Main Menu:
+                    """);
+        int menuSelection = validateMenuSelection(0, 3);
+        if(menuSelection == 1){
+
+        }else if(menuSelection == 2){
+
+        }else if(menuSelection == 3){
+
+        }
+    }
 
     public static void manageCurrentBooks(){
         //menu of currently reading books with action options that loops until exit
@@ -642,12 +752,14 @@ public class ReadingBuddy {
         //once user logged in pull in all the relevant info for user
         getAllReadBooksData();
         getAllCurrentBooksData();
+        getAllSearchPosts();
 
         //post-login code that only runs once (and thus not iin the main menu loop)
         if (currentUser.getID() > 0 && isLoggedIn){
             System.out.println("\n\n\nHello " + currentUser.getUsername() + "!\n");
             currentUser.initialSetCurrentlyReading(allCurrentBooks);
             currentUser.initialSetReadBooks(allReadBooks);
+            currentUser.initialSetBookGroups();
         }
 
         int mainMenuSelection;//to hold number representing which menu choice user has made

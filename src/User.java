@@ -10,6 +10,8 @@ package reading_bubby.src;
 import java.io.*;
 import java.util.*;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 //import com.opencsv.CSVReader;
 //import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
@@ -19,12 +21,14 @@ public class User {
     private String username;
     private ArrayList<CurrentBook> currentlyReading;
     private ArrayList<ReadBook> readBooks;
+    private ArrayList<BookGroup> bookGroups;
 
     public User(int id, String uName){
         userID = id;
         username = uName;
         currentlyReading = new ArrayList<CurrentBook>();
         readBooks = new ArrayList<ReadBook>();
+        bookGroups = new ArrayList<BookGroup>();
     }
 
     public int getID(){
@@ -53,6 +57,85 @@ public class User {
         }
     }
 
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
+
+
+    public void initialSetBookGroups(){
+        ArrayList<Integer> groupNums = initialGetBookGroups();
+        ArrayList<GroupPost> myGroupPosts = getGroupPostData(groupNums);
+        //counter so if all posts have been sorted into groups can stop early
+        int counter = 0;
+        for(BookGroup i : bookGroups){
+            for(GroupPost j : myGroupPosts){
+                if(i.getID() == j.getGroupID()){
+                    i.addPost(j);
+                    counter++;
+                }
+                if(counter == myGroupPosts.size()){
+                    break;
+                }
+            }
+            if(counter == myGroupPosts.size()){
+                break;
+            }
+        }
+    }
+
+    public ArrayList<Integer> initialGetBookGroups(){
+        ArrayList<Integer> groupNums = new ArrayList<Integer>();
+        try { 
+            // Create an object of file reader class with CSV file as a parameter. 
+            FileReader filereader = new FileReader("reading_bubby/appdata/book_groups.csv"); 
+            // create csvReader object and skip first Line 
+            CSVReader csvReader = new CSVReaderBuilder(filereader) 
+                                    .withSkipLines(1) 
+                                    .build(); 
+            List<String[]> allData = csvReader.readAll(); 
+            for (String[] row : allData) {
+                if(row[4].equals(username) || row[5].equals(username)){
+                    bookGroups.add(new BookGroup(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], row[3], row[4], row[5], Integer.parseInt(row[6]), Integer.parseInt(row[7])));
+                    groupNums.add(Integer.valueOf(row[0]));
+                }
+            }
+            return groupNums;
+        } 
+        catch (Exception e) { 
+            e.printStackTrace();
+            return groupNums;
+        }
+    }
+
+    public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
+        ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
+        try { 
+            FileReader filereader = new FileReader("reading_bubby/appdata/group_posts.csv"); 
+            // create csvReader object and skip first Line 
+            CSVReader csvReader = new CSVReaderBuilder(filereader) 
+                                    .withSkipLines(1) 
+                                    .build(); 
+            List<String[]> allData = csvReader.readAll(); 
+            for (String[] row : allData) {
+                //WILL VALUE MATCH? OR NEED TO BE SAME OBJECT?
+                if(groupNums.contains(Integer.valueOf(row[2]))){
+                    userGroupPosts.add(new GroupPost(username, row[1], Integer.parseInt(row[2])));
+                }
+            }
+            return userGroupPosts;
+        } 
+        catch (Exception e) { 
+            e.printStackTrace();
+            return userGroupPosts;
+        } 
+    }
+
+    public void addBookGroup(BookGroup toAdd){
+        bookGroups.add(toAdd);
+    }
+
+    //IF NEW BOOK GROUP ADD TO CSV IN MAIN FUNCTION
+
     public ArrayList<CurrentBook> getCurrentlyReading(){
         return currentlyReading;
     }
@@ -78,7 +161,7 @@ public class User {
             FileWriter filewriter = new FileWriter("reading_bubby/appdata/currently_reading.csv", true);
             CSVWriter writer = new CSVWriter(filewriter);
             String[] bookInfo = {Integer.toString(bookToAdd.getID()), bookToAdd.getTitle(), bookToAdd.getAuthor(), 
-                username, Integer.toString(0), Integer.toString(-1), Integer.toString(-1), "null"};
+                username, Integer.toString(0), Integer.toString(-1), Integer.toString(-1), "null", String.valueOf(bookToAdd.getHasOpenSearch())};
             writer.writeNext(bookInfo);
             writer.close();
             System.out.println("\n" + bookToAdd.getTitle() + " has been added to your Currently Reading!");

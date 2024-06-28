@@ -26,7 +26,7 @@ public class CurrentBook extends Book{
         currentChapter = cch;
         groupID = g;
         bookBuddy = bb;
-        hasOpenSearch = false;
+        hasOpenSearch = openSearch;
     }
 
     public String getUsername(){
@@ -62,9 +62,7 @@ public class CurrentBook extends Book{
     }
 
     public void setBookBuddy(String bbUsername){
-        if (bookBuddy == null){
-            bookBuddy = bbUsername;
-        }
+        bookBuddy = bbUsername;
     }
 
     public void setSearchPostOn(){

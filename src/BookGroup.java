@@ -136,4 +136,11 @@ public class BookGroup {
         }
     }
 
+    public String getBookBuddyName(String ownUsername){
+        if(members.get(0).equals(ownUsername)){
+            return members.get(1);
+        }else{
+            return members.get(0);
+        }
+    }
 }

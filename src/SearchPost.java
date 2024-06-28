@@ -26,6 +26,14 @@ public class SearchPost {
         whenPosted = LocalDate.now();
     }
 
+    public SearchPost(String userName, CurrentBook bookForGroup){
+        poster = userName;
+        bookID = bookForGroup.getID();
+        title = bookForGroup.getTitle();
+        author = bookForGroup.getAuthor();
+        whenPosted = LocalDate.now();
+    }
+
     public int getBookID(){
         return bookID;
     }

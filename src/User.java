@@ -164,7 +164,6 @@ public class User {
                 username, Integer.toString(0), Integer.toString(-1), Integer.toString(-1), "null", String.valueOf(bookToAdd.getHasOpenSearch())};
             writer.writeNext(bookInfo);
             writer.close();
-            System.out.println("\n" + bookToAdd.getTitle() + " has been added to your Currently Reading!");
         }
         catch (IOException e) { 
             e.printStackTrace(); 
@@ -207,6 +206,15 @@ public class User {
 
     public void removeFromCurrentlyReading(int idx){
        currentlyReading.remove(idx);
+    }
+
+    public CurrentBook getSpecificCurrentBook(int bookIDNum){
+        for(int i = 0; i < currentlyReading.size(); i++){
+            if(currentlyReading.get(i).getID() == bookIDNum){
+                return currentlyReading.get(i);
+            }
+        }
+        return new CurrentBook(-1, "", "", "");
     }
 
 }

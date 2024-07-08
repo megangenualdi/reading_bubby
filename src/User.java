@@ -8,6 +8,7 @@
 package reading_bubby.src;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.*;
 
 import com.opencsv.CSVReader;
@@ -107,6 +108,7 @@ public class User {
         }
     }
 
+    //gets all posts for groups a user is in
     public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
         ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
         try { 
@@ -115,11 +117,11 @@ public class User {
             CSVReader csvReader = new CSVReaderBuilder(filereader) 
                                     .withSkipLines(1) 
                                     .build(); 
-            List<String[]> allData = csvReader.readAll(); 
+            List<String[]> allData = csvReader.readAll();
             for (String[] row : allData) {
                 //WILL VALUE MATCH? OR NEED TO BE SAME OBJECT?
                 if(groupNums.contains(Integer.valueOf(row[2]))){
-                    userGroupPosts.add(new GroupPost(username, row[1], Integer.parseInt(row[2])));
+                    userGroupPosts.add(new GroupPost(row[0], row[1], Integer.parseInt(row[2]), LocalDate.parse(row[3])));
                 }
             }
             return userGroupPosts;
@@ -133,7 +135,6 @@ public class User {
     public void addBookGroup(BookGroup toAdd){
         bookGroups.add(toAdd);
     }
-
     //IF NEW BOOK GROUP ADD TO CSV IN MAIN FUNCTION
 
     public ArrayList<CurrentBook> getCurrentlyReading(){

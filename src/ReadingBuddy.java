@@ -360,7 +360,7 @@ public class ReadingBuddy {
             data.add(new String[] {"poster","book_id","title","author","date_posted"});
             for(int x = 0; x < allSearchPosts.size(); x++){
                 if((toRemove.getBookID() == allSearchPosts.get(x).getBookID()) && (toRemove.getPoster().equals(allSearchPosts.get(x).getPoster()))){
-                    //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allCurrentBooks Arraylist
+                    //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allSearchPosts Arraylist
                     allSearchPosts.remove(x);
                 } else {
                     data.add(new String[] {allSearchPosts.get(x).getPoster(), Integer.toString(allSearchPosts.get(x).getBookID()),
@@ -608,7 +608,7 @@ public class ReadingBuddy {
 
     public static int displayAndGetSearchPostSelection(ArrayList<SearchPost> posts){
         //returns an int corresponding to a menu selection-> 0=back to menu
-        //!!!IF return val > 0 AND <= passed in ArrayList: that number minus (-) 1 is the index number of selected post
+        //!!!IF return val > 0 AND <= passed in ArrayList size: that number minus (-) 1 is the index number of selected post
         // to accept in the ArrayList passed in)
         //!!IF return val == ArrayList passed in .size()+1: user selects make a new post for that book
         System.out.println("Posts Searching for a Book Buddy to Read " + posts.get(0).getTitle() + 
@@ -712,7 +712,7 @@ public class ReadingBuddy {
                 createNewBookGroup(postsToShow.get(menuSelection-1));
             }
         }else{
-            System.out.println("\nThere are no post from other users to show right now. Check back later!\n");
+            System.out.println("\nThere are no post from other users to show right now. Check back later or create your own!\n");
         }
     }
 

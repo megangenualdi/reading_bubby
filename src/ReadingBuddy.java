@@ -150,7 +150,7 @@ public class ReadingBuddy {
             List<String[]> allData = csvReader.readAll(); 
             CurrentBook tempCurrentBook;
             for (String[] row : allData) {
-                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7], Boolean.parseBoolean(row[8]));
+                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7], Boolean.valueOf(row[8]));
                 allCurrentBooks.add(tempCurrentBook);
             }
         } 
@@ -224,7 +224,7 @@ public class ReadingBuddy {
         File file = new File("reading_bubby/appdata/currently_reading.csv"); 
         try { 
             FileWriter outputfile = new FileWriter(file); 
-            CSVWriter writer = new CSVWriter(outputfile); 
+            CSVWriter writer = new CSVWriter(outputfile);
             List<String[]> data = new ArrayList<String[]>();
             data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy"});
             for(int x = 0; x < allCurrentBooks.size(); x++){
@@ -249,7 +249,29 @@ public class ReadingBuddy {
         } 
     }
 
-    public static void updateReadBookRating(ReadBook toUpdate){
+    public static void updateCurrentlyReading(){
+        File file = new File("reading_bubby/appdata/currently_reading.csv"); 
+        try { 
+            FileWriter outputfile = new FileWriter(file); 
+            CSVWriter writer = new CSVWriter(outputfile); 
+            List<String[]> data = new ArrayList<String[]>();
+            data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy","has_open_search"});
+            for(int x = 0; x < allCurrentBooks.size(); x++){
+                data.add(new String[] {Integer.toString(allCurrentBooks.get(x).getID()), allCurrentBooks.get(x).getTitle(), 
+                    allCurrentBooks.get(x).getAuthor(), allCurrentBooks.get(x).getUsername(), Integer.toString(allCurrentBooks.get(x).getPage()),
+                    Integer.toString(allCurrentBooks.get(x).getCh()), Integer.toString(allCurrentBooks.get(x).getGroup()),
+                    allCurrentBooks.get(x).getBB(), Boolean.toString(allCurrentBooks.get(x).getHasOpenSearch())});
+            }
+            writer.writeAll(data); 
+            // closing writer connection 
+            writer.close(); 
+        } 
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+    }
+
+    public static void updateReadBookRating(){
         //in file (in allReadBooks rating should update because all referring to same object?)
         File file = new File("reading_bubby/appdata/read_books.csv"); 
         try { 
@@ -317,39 +339,159 @@ public class ReadingBuddy {
         return allUsers;
     }
 
-    public static void createNewBookGroup(SearchPost wantedPost){
-        BookGroup newGroup = new BookGroup(nextUserBookGroup.get(2), wantedPost, currentUser.getUsername());
-        currentUser.addBookGroup(newGroup);
-        try{
-            FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
-            CSVWriter writer = new CSVWriter(filewriter);
-            String[] groupInfo = {Integer.toString(nextUserBookGroup.get(2)), Integer.toString(wantedPost.getBookID()),
-                 wantedPost.getTitle(), wantedPost.getAuthor(), wantedPost.getPoster(), currentUser.getUsername(), 
-                 Integer.toString(0), Integer.toString(0)};
-            writer.writeNext(groupInfo);
-            writer.close();
-            incrementNextIdNums(2);
-            System.out.println("\nYou are now book buddies with [user] to read [title] by [author]!");
+    public static void updateBookBuddysEntry(BookGroup groupInfo){
+        for(int i = 0; i < allCurrentBooks.size(); i++){
+            if(allCurrentBooks.get(i).getUsername().equals(groupInfo.getBookBuddyName(currentUser.getUsername())) &&
+                allCurrentBooks.get(i).getID() == groupInfo.getBookID()){
+                allCurrentBooks.get(i).setSearchPostOff();
+                allCurrentBooks.get(i).setBookBuddy(currentUser.getUsername());
+                allCurrentBooks.get(i).setGroup(groupInfo.getID());
+            }
         }
+    }
+
+    public static void removeSearchPost(SearchPost toRemove){
+        //remove from data file
+        File file = new File("reading_bubby/appdata/search_posts.csv"); 
+        try { 
+            FileWriter outputfile = new FileWriter(file); 
+            CSVWriter writer = new CSVWriter(outputfile); 
+            List<String[]> data = new ArrayList<String[]>();
+            data.add(new String[] {"poster","book_id","title","author","date_posted"});
+            for(int x = 0; x < allSearchPosts.size(); x++){
+                if((toRemove.getBookID() == allSearchPosts.get(x).getBookID()) && (toRemove.getPoster().equals(allSearchPosts.get(x).getPoster()))){
+                    //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allSearchPosts Arraylist
+                    allSearchPosts.remove(x);
+                } else {
+                    data.add(new String[] {allSearchPosts.get(x).getPoster(), Integer.toString(allSearchPosts.get(x).getBookID()),
+                        allSearchPosts.get(x).getTitle(), allSearchPosts.get(x).getAuthor(), 
+                        allSearchPosts.get(x).getWhenPosted().toString()});
+                }
+            }
+            writer.writeAll(data); 
+            // closing writer connection 
+            writer.close(); 
+        } 
         catch (IOException e) { 
             e.printStackTrace(); 
         } 
     }
 
-    public static void createNewSearchPost(Book toAdd){
-        SearchPost newPost = new SearchPost(currentUser.getUsername(), toAdd);
-        allSearchPosts.add(newPost);
-        try{
-            FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
-            CSVWriter writer = new CSVWriter(filewriter);
-            String[] postInfo = {currentUser.getUsername(), Integer.toString(newPost.getBookID()), newPost.getTitle(), newPost.getAuthor(), newPost.getWhenPosted().toString()};
-            writer.writeNext(postInfo);
-            writer.close();
-            System.out.println("\nYou are now book buddies with [user] to read [title] by [author]!");
+    public static void createNewBookGroup(SearchPost wantedPost){
+        boolean createGroup;
+        //create group but do not increment the nextUserBookGroup number until/only increment if okayed to make group
+        BookGroup newGroup = new BookGroup(nextUserBookGroup.get(2), wantedPost, currentUser.getUsername());
+        if(currentUser.checkIfInCurrentBooks(wantedPost.getBookID())){
+            CurrentBook toUpdate = currentUser.getSpecificCurrentBook(wantedPost.getBookID());
+            if(toUpdate.getGroup() > 0){
+                System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
+                createGroup = false;
+            }else{
+                createGroup = true;
+                toUpdate.setSearchPostOff();
+                toUpdate.setGroup(newGroup.getID());
+                toUpdate.setBookBuddy(newGroup.getBookBuddyName(currentUser.getUsername()));
+            }
+        }else{
+            CurrentBook toAdd = new CurrentBook(newGroup.getBookID(), newGroup.getTitle(), newGroup.getAuthor(), 
+                currentUser.getUsername(), 0, -1, newGroup.getID(), newGroup.getBookBuddyName(currentUser.getUsername()),
+                 false);
+            allCurrentBooks.add(toAdd);
+            currentUser.addToCurrentlyReading(toAdd);
+            createGroup = true;
         }
-        catch (IOException e) { 
-            e.printStackTrace(); 
-        } 
+        if(createGroup){
+            updateBookBuddysEntry(newGroup);
+            updateCurrentlyReading();
+            currentUser.addBookGroup(newGroup);
+            removeSearchPost(wantedPost);
+            try{
+                FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
+                CSVWriter writer = new CSVWriter(filewriter);
+                String[] groupInfo = {Integer.toString(nextUserBookGroup.get(2)), Integer.toString(wantedPost.getBookID()),
+                    wantedPost.getTitle(), wantedPost.getAuthor(), wantedPost.getPoster(), currentUser.getUsername(), 
+                    Integer.toString(0), Integer.toString(0)};
+                writer.writeNext(groupInfo);
+                writer.close();
+                incrementNextIdNums(2);
+                System.out.println("\nYou are now book buddies with " + wantedPost.getPoster() + " to read " +
+                    newGroup.getTitle() + " by " + newGroup.getAuthor() + "!\n\n");
+            }
+            catch (IOException e) { 
+                e.printStackTrace(); 
+            }
+        }
+    }
+
+    public static boolean checkBeforeCreateSearchPost(CurrentBook toCheck){
+        boolean moveForward;
+        if(toCheck.getGroup() > -1){
+            System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
+            moveForward = false;
+        }else if(toCheck.getHasOpenSearch()){
+            System.out.println("You alredy have a \"Book Buddy Wanted\" post for this book!\n");
+            moveForward = false;
+        }else{
+            moveForward = true;
+        }
+        return moveForward;
+    }
+
+    public static void createNewSearchPost(Book toAdd){
+        //if in currently reading update the attribute indicating if there is a search post for it or not
+        //if not in currently reading add it
+        CurrentBook toUpdate;
+        boolean addPost;
+            //CHECK IF ALREADY HAVE A BOOK BUDDY/GROUP FOR THIS BOOK
+        if(currentUser.checkIfInCurrentBooks(toAdd.getID())){
+            toUpdate = currentUser.getSpecificCurrentBook(toAdd.getID());
+            addPost = checkBeforeCreateSearchPost(toUpdate);
+            if(addPost){
+                toUpdate.setSearchPostOn();
+                updateCurrentlyReading();
+            }
+        }else{
+            addPost = true;
+            toUpdate = new CurrentBook(toAdd.getID(), toAdd.getTitle(), toAdd.getAuthor(), currentUser.getUsername());
+            toUpdate.setSearchPostOn();
+            allCurrentBooks.add(toUpdate);
+            currentUser.addToCurrentlyReading(toUpdate);
+        }
+        if(addPost){
+            SearchPost newPost = new SearchPost(currentUser.getUsername(), toAdd);
+            allSearchPosts.add(newPost);
+            try{
+                FileWriter filewriter = new FileWriter("reading_bubby/appdata/search_posts.csv", true);
+                CSVWriter writer = new CSVWriter(filewriter);
+                String[] postInfo = {currentUser.getUsername(), Integer.toString(newPost.getBookID()), newPost.getTitle(), newPost.getAuthor(), newPost.getWhenPosted().toString()};
+                writer.writeNext(postInfo);
+                writer.close();
+            }
+            catch (IOException e) { 
+                e.printStackTrace(); 
+            } 
+        }
+    }
+
+    //overload method to be able to take in a Book or CurrentBook
+    public static void createNewSearchPost(CurrentBook toAdd){
+        boolean makePost = checkBeforeCreateSearchPost(toAdd);
+        if(makePost){
+            toAdd.setSearchPostOn();
+            updateCurrentlyReading();
+            SearchPost newPost = new SearchPost(currentUser.getUsername(), toAdd);
+            allSearchPosts.add(newPost);
+            try{
+                FileWriter filewriter = new FileWriter("reading_bubby/appdata/search_posts.csv", true);
+                CSVWriter writer = new CSVWriter(filewriter);
+                String[] postInfo = {currentUser.getUsername(), Integer.toString(newPost.getBookID()), newPost.getTitle(), newPost.getAuthor(), newPost.getWhenPosted().toString()};
+                writer.writeNext(postInfo);
+                writer.close();
+            }
+            catch (IOException e) { 
+                e.printStackTrace(); 
+            } 
+        }
     }
 
     //MENU FUNCTIONS
@@ -423,55 +565,259 @@ public class ReadingBuddy {
 
     //IN PROGRESS
     public static void searchForBookBuddyMenu(){
-        boolean stayInMenu = true;
-        while (stayInMenu) {
-            /*if 1:
-                -
-             * if 2:
-             *  -let select from currently reading
-             *  -show any postings for same book
-             *  -choose from existing (if any) OR create a post
-             * if 3:
-             * 
-             */
-            System.out.println("""
-                    Find Book Buddy Menu\n
-                    1. View Book Buddy Postings
-                    2. Make a \"Seeking Book Buddy\" Post
+        boolean returnToMenu = true;
+        int menuSelection;
+        while (returnToMenu) {
+            System.out.print("""
+                        Book Buddy Finder Menu\n
+                        1. Select a book from your currently reading
+                        2. Enter a book (title and author)
+                        3. Select a book from the list of books
+                        4. View all \"Book Buddy Wanted\" Posts
 
-                    Enter your selection from the menu, or enter 0 to return to the Main Menu:
-                    """);
-            int menuSelection = validateMenuSelection(0, 2);
-            if (menuSelection == 1) {
-                //ADD DISPLAY AND SELECT FUNCTION
-                System.out.print("\nEnter your selection from the menu, or enter 0 to return to the previous menu:");
-            } else if (menuSelection == 2){
-                makeSearchPostMenu();
-            } else {
-                stayInMenu = false;
+                        Enter your selection from the menu, or enter 0 to return to the Main Menu:
+                        """);
+            menuSelection = validateMenuSelection(0, 4);
+            if(menuSelection == 1){
+                bookBuddyFromCurrentlyReading();
+            } else if(menuSelection == 2){
+                enterSearchPostByBook();
+            }else if(menuSelection == 3){
+                chooseFromAllBooks();
+            }else if (menuSelection == 4){
+                viewAllSearchPosts();
+            }else{
+                returnToMenu = false;
             }
         }
     }
 
-    //IN PROGRESS
-    public static void makeSearchPostMenu(){
-        System.out.println("""
-                    Book Buddy Post Menu\n
-                    1. Select a book from your currently reading
-                    2. Enter a book (title and author)
-                    3. Select a book from the list of books
+    //TO MOVE LATER FOR ORGANIZATION
+    //TO MOVE LATER FOR ORGANIZATION
+    //TO MOVE LATER FOR ORGANIZATION
 
-                    Enter your selection from the menu, or enter 0 to return to the Main Menu:
-                    """);
-        int menuSelection = validateMenuSelection(0, 3);
-        if(menuSelection == 1){
+    public static boolean checkForOwnSearchPost(ArrayList<SearchPost> toCheck, String title, String author){
+        for(int i = 0; i < toCheck.size(); i++){
+            if(toCheck.get(i).getPoster().equals(currentUser.getUsername()) && toCheck.get(i).getTitle().equals(title) &&
+            toCheck.get(i).getAuthor().equals(author)){
+                return true;
+            }
+        }
+        return false;
+    }
 
-        }else if(menuSelection == 2){
+    public static int displayAndGetSearchPostSelection(ArrayList<SearchPost> posts){
+        //returns an int corresponding to a menu selection-> 0=back to menu
+        //!!!IF return val > 0 AND <= passed in ArrayList size: that number minus (-) 1 is the index number of selected post
+        // to accept in the ArrayList passed in)
+        //!!IF return val == ArrayList passed in .size()+1: user selects make a new post for that book
+        System.out.println("Posts Searching for a Book Buddy to Read " + posts.get(0).getTitle() + 
+        " by " + posts.get(0).getAuthor() + ":\n");
+        int x;
+        //System.out.println("1. Create your own \"Book Buddy Wanted\" post");
+        for(x = 0; x < posts.size(); x++){
+            System.out.println((x+1) + ". Read with " + posts.get(x).getPoster() + "\n");
+        }
+        System.out.println((posts.size()+1) + ". Create your own \"Book Buddy Wanted\" post");
+        System.out.print("Enter the corresponding number to select a post and become Book Buddies, " +
+            "or enter " + (posts.size()+1) + " to create your own post, or 0 to return to the menu:");
+        int menuSelection = validateMenuSelection(0, posts.size()+1);
+        return menuSelection;
+    }
 
-        }else if(menuSelection == 3){
-
+    public static void chooseFromAllBooks(){
+        boolean stayInMenu = true;
+        boolean followUp = false;
+        int menuSelection;
+        Book selectedBook;
+        CurrentBook currentSelectedBook;
+        ArrayList<SearchPost> posts;
+        int seePosts = -1;
+        int menu2Selection = -1;
+        int menu3Selection = -1;
+        System.out.println("\n");
+        while (stayInMenu) {
+            for(int i = 0; i < allBooks.size(); i++){
+                System.out.println((i+1) + ". " + allBooks.get(i).getTitle() + " by " + allBooks.get(i).getAuthor());
+            }
+            System.out.print("\nEnter the corresponding number to select a book to find a book buddy (make a Book Buddy" +
+             "Wanted post or answer someone else's), or 0 to return to the menu:");
+            menuSelection = validateMenuSelection(0, allBooks.size());
+            if(menuSelection > 0){
+                //!!!!!MOVE THE CHECKING OF IF OPEN SEARCH TO BEFORE
+                selectedBook = allBooks.get(menuSelection-1);
+                posts = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
+                if(posts.size() > 0){
+                    if(currentUser.checkIfInCurrentBooks(selectedBook.getID())){
+                        currentSelectedBook = currentUser.getSpecificCurrentBook(selectedBook.getID());
+                        System.out.println("\n" + (currentSelectedBook.getGroup() > 0) + "\n");
+                        if(currentSelectedBook.getHasOpenSearch()){
+                            System.out.println("\nLooks like you already have a post for that book!\n");
+                            followUp = true;
+                        }else if(currentSelectedBook.getGroup() > 0){
+                            System.out.println("\nYou are already in a book group for that book!\n");
+                            followUp = true;
+                        }else{
+                            seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
+                            if(seePosts == 1){
+                                menu2Selection = displayAndGetSearchPostSelection(posts);
+                                if (menu2Selection > 0 && menu2Selection <= posts.size()){
+                                    createNewBookGroup(posts.get(menuSelection-1));
+                                    stayInMenu = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                if(posts.size() == 0 || seePosts == 2 || menu2Selection == (posts.size()+1)){
+                    menu3Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
+                        selectedBook.getTitle() + " by " + selectedBook.getAuthor() + "?");
+                    if(menu3Selection == 1){
+                        createNewSearchPost(selectedBook);
+                        stayInMenu = false;
+                        followUp = false;
+                        System.out.println("Posted!\n\n");
+                    }
+                }
+                if(followUp || menu3Selection == 2){
+                    int menu4Selection = confirmSelection("Would you like to select a different book?");
+                    if(menu4Selection == 2){
+                        stayInMenu = false;
+                    }
+                }
+            }
         }
     }
+
+    public static void viewAllSearchPosts(){
+        System.out.println("All \"Book Buddy Wanted\" Posts:\n\n");
+        int i;
+        ArrayList<SearchPost> postsToShow = new ArrayList<SearchPost>();
+        
+        for(int x = 0; x < allSearchPosts.size(); x++){
+            if(!allSearchPosts.get(x).getPoster().equals(currentUser.getUsername())){
+                postsToShow.add(allSearchPosts.get(x));
+            }
+        }
+        System.out.println("number of posts to show: " + postsToShow.size());
+        if(postsToShow.size() > 0){
+            for(i = 0; i < postsToShow.size(); i++){
+                System.out.println((i+1) + ". Read " + postsToShow.get(i).getTitle() + " by " +
+                postsToShow.get(i).getAuthor() + " with " + postsToShow.get(i).getPoster() + "\n");
+            }
+            System.out.print("Enter the corresponding number to select a post and become Book Buddies, " +
+            "or 0 to return to the menu:");
+            int menuSelection = validateMenuSelection(0, postsToShow.size());
+            if(menuSelection > 0){
+                createNewBookGroup(postsToShow.get(menuSelection-1));
+            }
+        }else{
+            System.out.println("\nThere are no post from other users to show right now. Check back later or create your own!\n");
+        }
+    }
+
+
+
+    public static void enterSearchPostByBook(){
+        int seePosts = -1;
+        String title = checkStrInput("Enter the book's title: ");
+        String author = checkStrInput("Enter the name of the book's author: ");
+        //check if that book exists in data already
+        ArrayList<Book> searchMatches = searchAllBooks(title, author);
+        if(searchMatches.size() > 0){
+            int menuSelection = -1;
+            ArrayList<SearchPost> postMatches = searchForSearchPosts(title, author);
+            if(postMatches.size() > 0){
+                boolean alreadyHasPost = checkForOwnSearchPost(postMatches, title, author);
+                if(alreadyHasPost){
+                    System.out.println("\nLooks like you already have a post for that book!\n");
+                }else{
+                    seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
+                    if(seePosts == 1){
+                        menuSelection = displayAndGetSearchPostSelection(postMatches);
+                        if (menuSelection > 0 && menuSelection <= postMatches.size()){
+                            createNewBookGroup(postMatches.get(menuSelection-1));
+                        }
+                    }
+                }
+            }
+            if(postMatches.size() == 0 || menuSelection == postMatches.size()+1 || seePosts == 2){
+                int menu2Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
+                title + " by " + author + "?");
+                if(menu2Selection == 1){
+                    createNewSearchPost(searchMatches.get(0));
+                    System.out.println("Posted!\n\n");
+                }
+            }
+        } else {
+            int menu3Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
+                title + " by " + author + "?");
+            if(menu3Selection == 1){
+                Book bookToAdd = addNewBook(title, author);
+                createNewSearchPost(bookToAdd);
+                System.out.println("Posted!\n\n");
+            }
+        }
+    }
+
+    public static void bookBuddyFromCurrentlyReading(){
+        int menuSelection;
+        int menu2Selection = -1;
+        int menu3Selection;
+        if (currentUser.getCurrentlyReading().size() < 1){
+            System.out.println("You have no books in your Currently Reading.\n");
+        } else {
+            //use a separate counter since will skip books that already have a book buddy
+            int counter = 0;
+            //keep books that don't have a buddy in temp separate array to have corresponding number
+            ArrayList<CurrentBook> tempCurrentBooks = new ArrayList<CurrentBook>();
+            for(int i = 1; i <= currentUser.getCurrentlyReading().size(); i++){
+                if(currentUser.getCurrentlyReading().get(i-1).getGroup() == -1 &&
+                 !currentUser.getCurrentlyReading().get(i-1).getHasOpenSearch()){
+                    counter++;
+                    System.out.println(counter + ". " + currentUser.getCurrentlyReading().get(i-1).getTitle() + " by "
+                    + currentUser.getCurrentlyReading().get(i-1).getAuthor());
+                    System.out.println("\tCurrent Page: " + currentUser.getCurrentlyReading().get(i-1).getPage()
+                    + " Current Chapter: " + (currentUser.getCurrentlyReading().get(i-1).getCh() != -1 ? currentUser.getCurrentlyReading().get(i-1).getCh() : "-"));
+                    System.out.println((""));
+                    tempCurrentBooks.add(currentUser.getCurrentlyReading().get(i-1));
+                }
+            }
+            System.out.print("To select a book, enter the corresponding number to the book.\nTo return to the previous menu enter 0: ");
+            menuSelection = validateMenuSelection(0, counter);
+            int seePosts = -1;
+            if (menuSelection != 0){
+                CurrentBook selectedBook = tempCurrentBooks.get(menuSelection-1);
+                ArrayList<SearchPost> matches = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
+                if(matches.size() > 0){
+                    //SHOULD I REMOVE THIS? this might be redundant because if already has search post it won't go into the temp
+                    boolean alreadyHasPost = checkForOwnSearchPost(matches, selectedBook.getTitle(), selectedBook.getAuthor());
+                    if(alreadyHasPost){
+                        System.out.println("Looks like you already have a post for that book!");
+                    }else{
+                        seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
+                        if(seePosts == 1){
+                            menu2Selection = displayAndGetSearchPostSelection(matches);
+                            if(menu2Selection > 0 && menu2Selection <= matches.size()){
+                                createNewBookGroup(matches.get(menu2Selection-1));
+                            }
+                        }
+                    }
+                }
+                if(matches.size() == 0 || menu2Selection == matches.size()+1 || seePosts == 2){
+                    menu3Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
+                    selectedBook.getTitle() + " by " + selectedBook.getAuthor() + "?");
+                    if(menu3Selection == 1){
+                        createNewSearchPost(selectedBook);
+                        System.out.println("Posted!\n\n");
+                    }
+                }
+            }
+        }
+    }
+
+    //TO MOVE LATER FOR ORGANIZATION
+    //TO MOVE LATER FOR ORGANIZATION^^^^^
 
     public static void manageCurrentBooks(){
         //menu of currently reading books with action options that loops until exit
@@ -566,8 +912,7 @@ public class ReadingBuddy {
                 } else {
                     selectedBook = currentUser.getReadBooks().get(numSelected-1);
                     selectedBook.rateBook(myScanner);
-                    updateReadBookRating(selectedBook);
-                    //ADD rating to file data
+                    updateReadBookRating();
                 }
             }
         }
@@ -612,6 +957,7 @@ public class ReadingBuddy {
                         toAdd = new CurrentBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), currentUser.getUsername());
                         allCurrentBooks.add(toAdd);
                         currentUser.addToCurrentlyReading(toAdd);
+                        System.out.println("\n" + bookToAdd.getTitle() + " has been added to your Currently Reading!");
                     }
                 }
             } else if (menuSelection == 2){
@@ -635,6 +981,7 @@ public class ReadingBuddy {
                             toAdd = new CurrentBook(bookToAdd.getID(), bookToAdd.getTitle(), bookToAdd.getAuthor(), currentUser.getUsername());
                             allCurrentBooks.add(toAdd);
                             currentUser.addToCurrentlyReading(toAdd);
+                            System.out.println("\n" + bookToAdd.getTitle() + " has been added to your Currently Reading!");
                         }
                     }
                 }
@@ -651,6 +998,16 @@ public class ReadingBuddy {
         for(int i = 0; i < allBooks.size(); i++){
             if(allBooks.get(i).getTitle().equals(title) && allBooks.get(i).getAuthor().equals(author)){
                 matches.add(allBooks.get(i));
+            }
+        }
+        return matches;
+    }
+
+    public static ArrayList<SearchPost> searchForSearchPosts(String title, String author){
+        ArrayList<SearchPost> matches = new ArrayList<SearchPost>();
+        for(int i = 0; i < allSearchPosts.size(); i++){
+            if(allSearchPosts.get(i).getTitle().equals(title) && allSearchPosts.get(i).getAuthor().equals(author)){
+                matches.add(allSearchPosts.get(i));
             }
         }
         return matches;
@@ -772,7 +1129,7 @@ public class ReadingBuddy {
                     break;
             
                 case 2:
-                    System.out.println("\nBook Buddies coming soon!\n\n");
+                    searchForBookBuddyMenu();
                     break;
 
                 case 3:

@@ -3,8 +3,6 @@ package reading_bubby.src;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-//import reading_bubby.src.ReadingBuddy;
-
 import com.opencsv.CSVWriter;
 
 public class BookGroup {
@@ -81,6 +79,8 @@ public class BookGroup {
         } else if (ReadingBuddy.currentUser.getUsername().equals(members.get(1))){
             currentPages.set(1, newPageNum);
         }
+        //ADD UPDATE IN THE GROUP_POSTS.CSV FILE
+        //UPDATE PAGE IN CURRENTUSER'S APPROPRIATE CURRENTBOOK (AND IN THE CSV FILE)
     }
 
     public void addNewPost(){
@@ -136,4 +136,11 @@ public class BookGroup {
         }
     }
 
+    public String getBookBuddyName(String ownUsername){
+        if(members.get(0).equals(ownUsername)){
+            return members.get(1);
+        }else{
+            return members.get(0);
+        }
+    }
 }

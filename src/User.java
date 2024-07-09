@@ -13,8 +13,6 @@ import java.util.*;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-//import com.opencsv.CSVReader;
-//import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 
 public class User {
@@ -64,7 +62,7 @@ public class User {
 
 
     public void initialSetBookGroups(){
-        ArrayList<Integer> groupNums = initialGetBookGroups();
+        ArrayList<Integer> groupNums = ReadingBuddy.initialGetBookGroups();
         ArrayList<GroupPost> myGroupPosts = getGroupPostData(groupNums);
         //counter so if all posts have been sorted into groups can stop early
         int counter = 0;
@@ -84,29 +82,7 @@ public class User {
         }
     }
 
-    public ArrayList<Integer> initialGetBookGroups(){
-        ArrayList<Integer> groupNums = new ArrayList<Integer>();
-        try { 
-            // Create an object of file reader class with CSV file as a parameter. 
-            FileReader filereader = new FileReader("reading_bubby/appdata/book_groups.csv"); 
-            // create csvReader object and skip first Line 
-            CSVReader csvReader = new CSVReaderBuilder(filereader) 
-                                    .withSkipLines(1) 
-                                    .build(); 
-            List<String[]> allData = csvReader.readAll(); 
-            for (String[] row : allData) {
-                if(row[4].equals(username) || row[5].equals(username)){
-                    bookGroups.add(new BookGroup(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], row[3], row[4], row[5], Integer.parseInt(row[6]), Integer.parseInt(row[7])));
-                    groupNums.add(Integer.valueOf(row[0]));
-                }
-            }
-            return groupNums;
-        } 
-        catch (Exception e) { 
-            e.printStackTrace();
-            return groupNums;
-        }
-    }
+    //initialGetBookGroups() MOVED TO ReadingBuddy.java
 
     //gets all posts for groups a user is in
     public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
@@ -141,6 +117,18 @@ public class User {
         return currentlyReading;
     }
 
+    //NEW - GET SPECIFIC BOOKGROUP
+    //should know book group exists before using function
+    public BookGroup getBookGroup(int bookGroupID){
+        for(int i = 0; i < bookGroups.size(); i++){
+            if(bookGroups.get(i).getID() == bookGroupID){
+                return bookGroups.get(i);
+            }
+        }
+        //should never happen
+        return new BookGroup(-1, -1, "", "", "", "", -1, -1);
+    }
+
     public void addToCurrentlyReading(CurrentBook bookToAdd){
         currentlyReading.add(bookToAdd);
         addToCurrentlyReadingCsv(bookToAdd);
@@ -173,6 +161,11 @@ public class User {
 
     public ArrayList<ReadBook> getReadBooks(){
         return readBooks;
+    }
+
+    //!!NEW
+    public ArrayList<BookGroup> getBookGroups(){
+        return bookGroups;
     }
 
     public void addToReadBooks(ReadBook bookToAdd){

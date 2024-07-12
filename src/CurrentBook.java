@@ -8,6 +8,8 @@ public class CurrentBook extends Book{
     private int groupID;
     private String bookBuddy;
     private boolean hasOpenSearch;
+    //NEW SPRINT3
+    private boolean isDone;
     
     public CurrentBook(int id, String t, String a, String uName){
         super(id, t, a);
@@ -15,11 +17,13 @@ public class CurrentBook extends Book{
         currentPage = 0;
         currentChapter = -1; //-1 means do not show chapter unless set
         groupID = -1;//-1 indicates no group
-        bookBuddy = null;
+        bookBuddy = "null";
         hasOpenSearch = false;
+        //NEW SPRINT3
+        isDone = false;
     }
 
-    public CurrentBook(int id, String t, String a, String uName, int cpage, int cch, int g, String bb, boolean openSearch){
+    public CurrentBook(int id, String t, String a, String uName, int cpage, int cch, int g, String bb, boolean openSearch, boolean done){
         super(id, t, a);
         username = uName;
         currentPage = cpage;
@@ -27,6 +31,8 @@ public class CurrentBook extends Book{
         groupID = g;
         bookBuddy = bb;
         hasOpenSearch = openSearch;
+        //NEW SPRINT3
+        isDone = done;
     }
 
     public String getUsername(){
@@ -48,6 +54,16 @@ public class CurrentBook extends Book{
     public String getBB(){
         return bookBuddy;
     }
+
+    //NEW SPRINT3
+    public boolean getIsDone(){
+        return isDone;
+    }
+
+    public void setIsDone(boolean newVal){
+        isDone = newVal;
+    }
+    //
 
     public void setCurrentPage(int pageNum){
         currentPage = pageNum;

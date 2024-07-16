@@ -84,30 +84,6 @@ public class User {
 
     //initialGetBookGroups() MOVED TO ReadingBuddy.java
 
-    //MOVED TO ReadingBuddy.java
-   /*  public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
-        ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
-        try { 
-            FileReader filereader = new FileReader("reading_bubby/appdata/group_posts.csv"); 
-            // create csvReader object and skip first Line 
-            CSVReader csvReader = new CSVReaderBuilder(filereader) 
-                                    .withSkipLines(1) 
-                                    .build(); 
-            List<String[]> allData = csvReader.readAll();
-            for (String[] row : allData) {
-                //WILL VALUE MATCH? OR NEED TO BE SAME OBJECT?
-                if(groupNums.contains(Integer.valueOf(row[2]))){
-                    userGroupPosts.add(new GroupPost(row[0], row[1], Integer.parseInt(row[2]), LocalDate.parse(row[3])));
-                }
-            }
-            return userGroupPosts;
-        } 
-        catch (Exception e) { 
-            e.printStackTrace();
-            return userGroupPosts;
-        } 
-    } */
-
     public void addBookGroup(BookGroup toAdd){
         bookGroups.add(toAdd);
     }

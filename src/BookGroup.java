@@ -74,13 +74,14 @@ public class BookGroup {
 
     public void updateCurrentPage(int newPageNum){
         //can only update own page number when logged in (index in memebers corresponds to position of that user's info in currentPages)
-        if(ReadingBuddy.currentUser.getUsername().equals(members.get(0))){
-            currentPages.set(0, newPageNum);
-        } else if (ReadingBuddy.currentUser.getUsername().equals(members.get(1))){
-            currentPages.set(1, newPageNum);
-        }
-        //ADD UPDATE IN THE GROUP_POSTS.CSV FILE
-        //UPDATE PAGE IN CURRENTUSER'S APPROPRIATE CURRENTBOOK (AND IN THE CSV FILE)
+        int idxToUpdate = getUserArrPosition(ReadingBuddy.currentUser.getUsername());
+        currentPages.set(idxToUpdate, newPageNum);
+    }
+
+    //!!NEW: takes a username as arg and returns that user's current page in the book for the book group
+    public int getUserPageNum(String getPageFor){
+        int pageIdx = getUserArrPosition(getPageFor);
+        return currentPages.get(pageIdx);
     }
 
     public void addNewPost(){
@@ -112,7 +113,6 @@ public class BookGroup {
     public GroupPost createGroupPost(){
         GroupPost toAdd;
         String postText;
-        //System.out.println("Enter the text of your post below and press return/enter to submit the post:\n");
         postText = ReadingBuddy.checkStrInput("Enter the text of your post below and press return/enter to submit the post:\n");
         int confirmPost = ReadingBuddy.confirmSelection("Do you want to post the text entered?");
         if (confirmPost == 1){
@@ -125,22 +125,30 @@ public class BookGroup {
 
     public void showPosts(){
         if(posts.size() > 0){
-            System.out.println("-------------------------Group Posts-------------------------");
-            for(int x = 0; x < posts.size(); x++){
+            System.out.println("\n-------------------------Group Posts-------------------------\n");
+            for(int x = posts.size()-1; x >= 0; x--){
                 System.out.println(posts.get(x).getUserName() + " posted on " + posts.get(x).getDayPosted() + ":");
                 System.out.println("\"" + posts.get(x).getContent() + "\"\n");
             }
             System.out.println("-------------------------------------------------------------");
         } else {
-            System.out.println("There are no posts in this group yet.");
+            System.out.println("\n\nThere are no posts in this group yet.");
         }
     }
 
     public String getBookBuddyName(String ownUsername){
-        if(members.get(0).equals(ownUsername)){
+        if(getUserArrPosition(ownUsername) == 0){
             return members.get(1);
         }else{
             return members.get(0);
+        }
+    }
+
+    public int getUserArrPosition(String userName){
+        if(members.get(0).equals(userName)){
+            return 0;
+        }else{
+            return 1;
         }
     }
 }

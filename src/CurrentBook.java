@@ -31,7 +31,7 @@ public class CurrentBook extends Book{
         groupID = g;
         bookBuddy = bb;
         hasOpenSearch = openSearch;
-        //NEW SPRINT3
+        //NEW SPRINT3!
         isDone = done;
     }
 

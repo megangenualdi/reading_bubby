@@ -1411,7 +1411,7 @@ public class ReadingBuddy {
                 //confirm end group --> CAN ADD MORE LATER (TAILOR RESPONSES TO IF BOTH GROUP MEMBERS ARE DONE OR NOT ETC)
                 System.out.println("""
                     You can continue a book group for as long as you would like, regardless of if one or both of you 
-                    has finnished the book.""");
+                    has finished the book.""");
                 int endGroupConfirmation = confirmSelection("Are you sure you want to end this book group with " + bookBuddyName + "?");
                 if(endGroupConfirmation == 1){
                     //adding extra level of confirmation that can be removed later

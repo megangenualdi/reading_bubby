@@ -1,18 +1,15 @@
 /*
  * CS335 
  * Summer 2024
- * Midterm - Group 1
+ * Group 1
  * Name: Sophie Steinberger
  * Created: 06/11/2024
+ * Last Updated: 07/23/2024
  */
 package reading_bubby.src;
 
 import java.io.*;
-//import java.time.LocalDate;
 import java.util.*;
-
-//import com.opencsv.CSVReader;
-//import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 
 public class User {
@@ -56,11 +53,6 @@ public class User {
         }
     }
 
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-
-
     public void initialSetBookGroups(){
         ArrayList<Integer> groupNums = ReadingBuddy.initialGetBookGroups();
         ArrayList<GroupPost> myGroupPosts = ReadingBuddy.getGroupPostData(groupNums);
@@ -87,13 +79,11 @@ public class User {
     public void addBookGroup(BookGroup toAdd){
         bookGroups.add(toAdd);
     }
-    //IF NEW BOOK GROUP ADD TO CSV IN MAIN FUNCTION
 
     public ArrayList<CurrentBook> getCurrentlyReading(){
         return currentlyReading;
     }
 
-    //NEW - GET SPECIFIC BOOKGROUP
     //should know book group exists before using function
     public BookGroup getBookGroup(int bookGroupID){
         for(int i = 0; i < bookGroups.size(); i++){
@@ -110,7 +100,7 @@ public class User {
         addToCurrentlyReadingCsv(bookToAdd);
     }
 
-    //NEW SPRINT3 - CHANGED TO RETURN THE INDEX NUMBER OF BOOK IN CURRENTLYREADING
+    //returns index number of book in currentlyReading (-1 if not in currentlyReading)
     public int checkIfInCurrentBooks(int idToCheck){
         if(currentlyReading.size() > 0){
             for(int i = 0; i < currentlyReading.size(); i++){
@@ -141,7 +131,6 @@ public class User {
         return readBooks;
     }
 
-    //!!NEW
     public ArrayList<BookGroup> getBookGroups(){
         return bookGroups;
     }
@@ -189,7 +178,6 @@ public class User {
         return new CurrentBook(-1, "", "", "");
     }
 
-    //NEW SPRINT3
     public void removeBookGroup(BookGroup toRemove){
         for(int i = 0; i < bookGroups.size(); i++){
             if(bookGroups.get(i).getID() == toRemove.getID()){

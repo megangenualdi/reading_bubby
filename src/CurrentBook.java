@@ -1,3 +1,12 @@
+/*
+ * CS335 
+ * Summer 2024
+ * Group 1
+ * Name: Sophie Steinberger
+ * Created: 06/11/2024
+ * Last Updated: 07/23/2024
+ */
+
 package reading_bubby.src;
 
 public class CurrentBook extends Book{
@@ -8,7 +17,6 @@ public class CurrentBook extends Book{
     private int groupID;
     private String bookBuddy;
     private boolean hasOpenSearch;
-    //NEW SPRINT3
     private boolean isDone;
     
     public CurrentBook(int id, String t, String a, String uName){
@@ -19,7 +27,6 @@ public class CurrentBook extends Book{
         groupID = -1;//-1 indicates no group
         bookBuddy = "null";
         hasOpenSearch = false;
-        //NEW SPRINT3
         isDone = false;
     }
 
@@ -31,7 +38,6 @@ public class CurrentBook extends Book{
         groupID = g;
         bookBuddy = bb;
         hasOpenSearch = openSearch;
-        //NEW SPRINT3!
         isDone = done;
     }
 
@@ -55,7 +61,6 @@ public class CurrentBook extends Book{
         return bookBuddy;
     }
 
-    //NEW SPRINT3
     public boolean getIsDone(){
         return isDone;
     }
@@ -63,7 +68,6 @@ public class CurrentBook extends Book{
     public void setIsDone(boolean newVal){
         isDone = newVal;
     }
-    //
 
     public void setCurrentPage(int pageNum){
         currentPage = pageNum;

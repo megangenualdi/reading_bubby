@@ -1,3 +1,11 @@
+/*
+ * CS335 
+ * Summer 2024
+ * Group 1
+ * Name: Sophie Steinberger
+ * Created: 06/11/2024
+ * Last Updated: 07/23/2024
+ */
 package reading_bubby.src;
 
 import java.io.FileWriter;
@@ -15,7 +23,6 @@ public class BookGroup {
     private ArrayList<String> members;
     private ArrayList<GroupPost> posts;
     private ArrayList<Integer> currentPages;
-    //NEW SPRINT3
     private ArrayList<Boolean> isDone;
     
     public BookGroup(int id, SearchPost wantedPost, String member2){
@@ -48,7 +55,6 @@ public class BookGroup {
         currentPages = new ArrayList<Integer>();
         currentPages.add(pagesRead1);
         currentPages.add(pagesRead2);
-        //NEW SPRINT3
         isDone = new ArrayList<Boolean>();
         isDone.add(isDone1);
         isDone.add(isDone2);
@@ -82,7 +88,6 @@ public class BookGroup {
         return currentPages;
     }
 
-    //NEW SPRINT3
     public boolean getUserIsDone(String userName){
         int idx = getUserArrPosition(userName);
         return isDone.get(idx);
@@ -100,9 +105,6 @@ public class BookGroup {
     public void updateCurrentPage(int newPageNum){
         //can only update own page number when logged in (index in memebers corresponds to position of that user's info in currentPages)
         int idxToUpdate = getUserArrPosition(ReadingBuddy.currentUser.getUsername());
-        //TESTING
-        System.out.println("idx: " + idxToUpdate + "   newpagenum: " + newPageNum);
-
         currentPages.set(idxToUpdate, newPageNum);
     }
 

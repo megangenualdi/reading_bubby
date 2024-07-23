@@ -1,9 +1,10 @@
 /*
  * CS335 
  * Summer 2024
- * Midterm - Group 1
+ * Group 1
  * Name: Sophie Steinberger
  * Created: 06/11/2024
+ * Last Updated: 07/23/2024
  */
 
 package reading_bubby.src;
@@ -18,14 +19,14 @@ public class ReadBook extends Book {
     public ReadBook(int id, String t, String a, String uName){
         super(id, t, a);
         username = uName;
-        //default set to -1, which will need to code to not display unless rating >= 0
+        //default set to -1, but there is code to not display unless rating >= 0
         rating = -1;
     }
 
     public ReadBook(int id, String t, String a, String uName, int r){
         super(id, t, a);
         username = uName;
-        //default set to -1, which will need to code to not display unless rating >= 0
+        //default set to -1, there is code to not display unless rating >= 0
         rating = r;
     }
 
@@ -37,7 +38,6 @@ public class ReadBook extends Book {
         return username;
     }
 
-    //QUESTION: will this update that ReadBook's rating in both the user's readBooks ArrayList AND the allReadBooks ArrayList
     public void rateBook(Scanner myScanner){
         System.out.println("Rating " +  super.getTitle() + " by " + super.getAuthor() + "\n");
         System.out.print("Rate the book from 1 to 10, or enter 0 to exit without rating: ");

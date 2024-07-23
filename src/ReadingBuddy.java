@@ -1,10 +1,10 @@
 /*
  * CS335 
  * Summer 2024
- * Midterm - Group 1
+ * Group 1
  * Name: Sophie Steinberger
  * Created: 06/11/2024
- * Last Updated: 07/08/2024
+ * Last Updated: 07/23/2024
  */
 
 package reading_bubby.src;
@@ -27,10 +27,10 @@ public class ReadingBuddy {
     static boolean isLoggedIn = false;
     static ArrayList<SearchPost> allSearchPosts = new ArrayList<SearchPost>();
     static ArrayList<BookGroup> allBookGroups = new ArrayList<BookGroup>();
-    //NEW SPRINT3
     static ArrayList<GroupPost> allGroupPosts = new ArrayList<GroupPost>();
 
     //INPUT VALIDATION (and helpers)
+
     public static int validateMenuSelection(int minVal, int maxVal){
         int selection = -1;
         do {
@@ -109,12 +109,10 @@ public class ReadingBuddy {
             FileReader filereader = new FileReader("reading_bubby/appdata/next_id_nums.csv"); 
             CSVReader csvReader = new CSVReader(filereader); 
             String[] csvLine = csvReader.readNext();
-            //ArrayList<Integer> nextIds = new ArrayList<Integer>();
             nextUserBookGroup.add(Integer.valueOf(csvLine[0]));
             nextUserBookGroup.add(Integer.valueOf(csvLine[1]));
             nextUserBookGroup.add(Integer.valueOf(csvLine[2]));
             csvReader.close();
-            //return nextIds;
         } 
         catch (Exception e) { 
             e.printStackTrace(); 
@@ -124,9 +122,7 @@ public class ReadingBuddy {
     public static ArrayList<String[]> getAllUserData(){
         ArrayList<String[]> allUsers = new ArrayList<String[]>();
         try { 
-            // Create an object of file reader class with CSV file as a parameter. 
             FileReader filereader = new FileReader("reading_bubby/appdata/users.csv"); 
-            // create csvReader object and skip first Line 
             CSVReader csvReader = new CSVReaderBuilder(filereader) 
                                       .withSkipLines(1) 
                                       .build(); 
@@ -145,7 +141,6 @@ public class ReadingBuddy {
     //gather all current book file entries
     public static void getAllCurrentBooksData(){
         try { 
-            // Create an object of file reader class with CSV file as a parameter. 
             FileReader filereader = new FileReader("reading_bubby/appdata/currently_reading.csv"); 
             // create csvReader object and skip first Line 
             CSVReader csvReader = new CSVReaderBuilder(filereader) 
@@ -164,8 +159,7 @@ public class ReadingBuddy {
     }
 
     public static void getAllReadBooksData(){
-        try { 
-            // Create an object of file reader class with CSV file as a parameter. 
+        try {
             FileReader filereader = new FileReader("reading_bubby/appdata/read_books.csv"); 
             // create csvReader object and skip first Line 
             CSVReader csvReader = new CSVReaderBuilder(filereader) 
@@ -208,8 +202,6 @@ public class ReadingBuddy {
             FileReader filereader = new FileReader("reading_bubby/appdata/books.csv"); 
             CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(1).build(); 
             List<String[]> allData = csvReader.readAll(); 
-
-            //ArrayList<Book> tempBookList = new ArrayList<Book>();
             Book tempBook;
             //if username matches, add it to user's read books
             for (String[] row : allData) {
@@ -222,12 +214,12 @@ public class ReadingBuddy {
         } 
     }
 
-    //UPDATED - MOVED FROM USER CLASS (now adds groups to a static variable and to the user's own attribute)!!!
+    //UPDATED - MOVED FROM USER CLASS (now adds groups to a static variable and to the user's own attribute)
     public static ArrayList<Integer> initialGetBookGroups(){
         ArrayList<Integer> groupNums = new ArrayList<Integer>();
         try { 
             FileReader filereader = new FileReader("reading_bubby/appdata/book_groups.csv"); 
-            // create csvReader object and skip first Line 
+            //create csvReader object and skip first Line 
             CSVReader csvReader = new CSVReaderBuilder(filereader) 
                                     .withSkipLines(1) 
                                     .build(); 
@@ -278,9 +270,7 @@ public class ReadingBuddy {
 
     //FUNCTIONS FOR UPDATING DATA
 
-    //NEW SPRINT3: remove the posts that are related to a book group
     public static void removeGroupsPosts(BookGroup groupToRemove){
-        //remove from data file
         File file = new File("reading_bubby/appdata/group_posts.csv"); 
         try { 
             FileWriter outputfile = new FileWriter(file); 
@@ -296,7 +286,6 @@ public class ReadingBuddy {
                 }
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -306,7 +295,6 @@ public class ReadingBuddy {
 
     //NEW SPRINT3: remove a bookgroup from allBookGroups and grom the book_groups.csv file
     public static void removeBookGroup(BookGroup toRemove){
-        //remove from data file
         File file = new File("reading_bubby/appdata/book_groups.csv"); 
         try { 
             FileWriter outputfile = new FileWriter(file); 
@@ -325,7 +313,6 @@ public class ReadingBuddy {
                 }
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -333,7 +320,6 @@ public class ReadingBuddy {
         } 
     }
 
-    //NEW SPRINT3: updated to be able to use with currentUser's currentbook or their book buddy's
     public static void removeCurrentBook(CurrentBook toRemove){
         //remove from data file
         File file = new File("reading_bubby/appdata/currently_reading.csv"); 
@@ -345,11 +331,9 @@ public class ReadingBuddy {
             for(int x = 0; x < allCurrentBooks.size(); x++){
                 if((toRemove.getID() == allCurrentBooks.get(x).getID()) && (toRemove.getUsername().equals(allCurrentBooks.get(x).getUsername()))){
                     //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allCurrentBooks Arraylist
-                    //NEW SPRINT 3 (misc--should delete search post if has one)
                     if(toRemove.getHasOpenSearch()){
                         SearchPost postToDel = searchForSpecificSearchPost(toRemove.getTitle(), toRemove.getAuthor(),
                          toRemove.getUsername());
-                        //below if should not be necessary because the if currently in has checked if there is an associated search post
                         if(postToDel.getBookID() == -1){
                             removeSearchPost(postToDel);
                         }
@@ -369,7 +353,6 @@ public class ReadingBuddy {
                 }
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -391,7 +374,6 @@ public class ReadingBuddy {
                     allCurrentBooks.get(x).getBB(), Boolean.toString(allCurrentBooks.get(x).getHasOpenSearch()), Boolean.toString(allCurrentBooks.get(x).getIsDone())});
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -399,7 +381,6 @@ public class ReadingBuddy {
         } 
     }
 
-    //!!NEW - just rewrites all the book groups to the book_groups csv file to reflect updates to existing book group objects
     public static void updateBookGroups(){
         File file = new File("reading_bubby/appdata/book_groups.csv"); 
         try { 
@@ -423,7 +404,6 @@ public class ReadingBuddy {
     }
 
     public static void updateReadBookRating(){
-        //in file (in allReadBooks rating should update because all referring to same object?)
         File file = new File("reading_bubby/appdata/read_books.csv"); 
         try { 
             FileWriter outputfile = new FileWriter(file); 
@@ -436,7 +416,6 @@ public class ReadingBuddy {
                     allReadBooks.get(x).getUsername(), Integer.toString(allReadBooks.get(x).getRating())});
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -490,7 +469,6 @@ public class ReadingBuddy {
         return allUsers;
     }
 
-    //NEW SPRINT3
     public static CurrentBook getSpecificCurrentBook(String userName, int bookID){
         for(int i = 0; i < allCurrentBooks.size(); i++){
             if(allCurrentBooks.get(i).getUsername().equals(userName) &&
@@ -501,7 +479,6 @@ public class ReadingBuddy {
         return new CurrentBook(-1, "", "", "");
     }
 
-    //NEW SPRINT3 - UPDATED
     public static void updateBookBuddysEntry(BookGroup groupInfo){
         CurrentBook toUpdate = getSpecificCurrentBook(groupInfo.getBookBuddyName(currentUser.getUsername()), groupInfo.getBookID());
         toUpdate.setSearchPostOff();
@@ -529,7 +506,6 @@ public class ReadingBuddy {
                 }
             }
             writer.writeAll(data); 
-            // closing writer connection 
             writer.close(); 
         } 
         catch (IOException e) { 
@@ -598,11 +574,8 @@ public class ReadingBuddy {
     }
 
     public static void createNewSearchPost(Book toAdd){
-        //if in currently reading update the attribute indicating if there is a search post for it or not
-        //if not in currently reading add it
         CurrentBook toUpdate;
         boolean addPost;
-            //CHECK IF ALREADY HAVE A BOOK BUDDY/GROUP FOR THIS BOOK
         if(currentUser.checkIfInCurrentBooks(toAdd.getID()) >= 0){
             toUpdate = currentUser.getSpecificCurrentBook(toAdd.getID());
             addPost = checkBeforeCreateSearchPost(toUpdate);
@@ -684,7 +657,6 @@ public class ReadingBuddy {
     }
 
     public static void manageMyBooksMenu(){
-        //While loop to return to this menu unless select to exit
         boolean stayBooksMenu = true;
         while (stayBooksMenu){
             System.out.println("\nMy Books Menu:\n");
@@ -716,14 +688,6 @@ public class ReadingBuddy {
         }
     }
 
-
-
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-    //MARKER TO INDICATE WORKING HERE (JUST TO CATCH EYE WHEN SCROLLING)
-
-
-    //IN PROGRESS
     public static void searchForBookBuddyMenu(){
         boolean returnToMenu = true;
         int menuSelection;
@@ -753,10 +717,6 @@ public class ReadingBuddy {
             }
         }
     }
-
-    //TO MOVE LATER FOR ORGANIZATION
-    //TO MOVE LATER FOR ORGANIZATION
-    //TO MOVE LATER FOR ORGANIZATION
 
     public static void viewAndManageOwnSearchPosts(){
         //get all search posts by user
@@ -791,7 +751,6 @@ public class ReadingBuddy {
                      + usersPosts.get(menuSelection-1).getTitle() + " by " + usersPosts.get(menuSelection-1).getAuthor()
                       + "?\n");
                     if(menu2Selection == 1){
-                        //also update the currently reading to remove the search post
                         CurrentBook toUpdate = currentUser.getSpecificCurrentBook(usersPosts.get(menuSelection-1).getBookID());
                         toUpdate.setSearchPostOff();
                         updateCurrentlyReading();
@@ -821,7 +780,6 @@ public class ReadingBuddy {
         System.out.println("Posts Searching for a Book Buddy to Read " + posts.get(0).getTitle() + 
         " by " + posts.get(0).getAuthor() + ":\n");
         int x;
-        //System.out.println("1. Create your own \"Book Buddy Wanted\" post");
         for(x = 0; x < posts.size(); x++){
             System.out.println((x+1) + ". Read with " + posts.get(x).getPoster() + "\n");
         }
@@ -832,9 +790,6 @@ public class ReadingBuddy {
         return menuSelection;
     }
 
-
-    //!!! debug / figure out why just looping through choices when selection made
-    //NEW SPRINT4 - UPDATED --reworking structure of function for fixing bug
     public static void chooseFromAllBooks(){
         boolean stayInMenu = true;
         boolean followUp = false;
@@ -853,14 +808,7 @@ public class ReadingBuddy {
             System.out.print("\nEnter the corresponding number to select a book to find a book buddy (make a Book Buddy" +
              "Wanted post or answer someone else's), or 0 to return to the menu:");
             menuSelection = validateMenuSelection(0, allBooks.size());
-            //TESTING
-            System.out.println("!menuSelection = " + menuSelection + "\n");
-
             if(menuSelection > 0){
-                //!!!!!MOVE THE CHECKING OF IF OPEN SEARCH TO BEFORE
-                //TESTING
-                System.out.println("in menuSelection > 0 if");
-
                 selectedBook = allBooks.get(menuSelection-1);
                 if(currentUser.checkIfInCurrentBooks(selectedBook.getID()) >= 0){
                     currentSelectedBook = currentUser.getSpecificCurrentBook(selectedBook.getID());
@@ -875,9 +823,6 @@ public class ReadingBuddy {
                 if(followUp == false){
                     posts = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
                     if(posts.size() > 0){
-                        //TESTING
-                        System.out.println("in posts.size() > 0 if");
-
                         seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
                         if(seePosts == 1){
                             menu2Selection = displayAndGetSearchPostSelection(posts);
@@ -942,14 +887,12 @@ public class ReadingBuddy {
         boolean endNow = false;
         String title = checkStrInput("Enter the book's title: ");
         String author = checkStrInput("Enter the name of the book's author: ");
-        //check if that book exists in data already
         //This array should only have one item (if any) because search by title and author
         ArrayList<Book> searchMatches = searchAllBooks(title, author);
         int bookIndex = currentUser.checkIfInCurrentBooks(searchMatches.get(0).getID());
         if(searchMatches.size() > 0){
             int menuSelection = -1;
             if(bookIndex >= 0){
-                //!!!NEW SPRINT4: make sure user not already in a book group for that book
                 if(currentUser.getCurrentlyReading().get(bookIndex).getGroup() > 0){
                     System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
                     endNow = true;
@@ -1046,23 +989,17 @@ public class ReadingBuddy {
         }
     }
 
-    //TO MOVE LATER FOR ORGANIZATION
-    //TO MOVE LATER FOR ORGANIZATION^^^^^
-
     public static void manageCurrentBooks(){
-        //menu of currently reading books with action options that loops until exit
         boolean stayCurrentBooks = true;
         int numSelected;
         int i;
         CurrentBook selectedBook;
         while (stayCurrentBooks){
             System.out.println("\n\nCurrently Reading Manager\n");
-            //if user has no current books send them back to books menu
             if (currentUser.getCurrentlyReading().size() < 1){
                 System.out.println("You have no books in your Currently Reading.\n Returning you to the My Books Menu (there is an option there to add books to your Currently Reading!)");
                 stayCurrentBooks = false;
             } else {
-                //give user option to return to books menu or to select a book to mark as done or remove
                 for(i = 1; i <= currentUser.getCurrentlyReading().size(); i++){
                     System.out.println(i + ". " + currentUser.getCurrentlyReading().get(i-1).getTitle() + " by "
                      + currentUser.getCurrentlyReading().get(i-1).getAuthor());
@@ -1073,19 +1010,15 @@ public class ReadingBuddy {
                     }
                     System.out.println((""));
                 }
-                //!!!NEW: ADDING THE OPTION TO UPDATE PAGE NUMBER 
-                //!!!FIX: if in book group, warn user that removing book will end their book group/confirm with user, edit buddy's currentbook, send notification etc
                 System.out.print("To update your current page, mark a book as finished, or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0: ");
                 numSelected = validateMenuSelection(0, currentUser.getCurrentlyReading().size());
                 if(numSelected == 0){
-                    //if select exit change LCV
                     stayCurrentBooks = false;
                 } else {
                     //give user options for selected book
                     selectedBook = currentUser.getCurrentlyReading().get(numSelected-1);
                     System.out.println("\nYou have selected " + selectedBook.getTitle() + " by " +
                     selectedBook.getAuthor() + ":\n");
-                    //!!!!NEW: CHANGED OPTION ONE TO UPDATE PAGE NUMBER AND SHIFTED ALL OTHER OPTIONS UP BY 1
                     System.out.print("""
                         1. Update Current Page
                         2. Mark Book as Read
@@ -1139,8 +1072,6 @@ public class ReadingBuddy {
         }
     }
 
-    //!!!!NEW: get new page num, confirm number with user, then if confirmed yes updates the user's current page in
-    //group (if in a group for that book) object and in current book object and in the relevant csvs
     public static void updateCurrentPage(CurrentBook toUpdate){
         //get new page num
         int newPageNum = getNewPageNum();
@@ -1156,7 +1087,7 @@ public class ReadingBuddy {
         }
     }
 
-    //!!!NEW!!! gets a page number from user for updating current page number
+    //gets a page number from user for updating current page number
     public static int getNewPageNum(){
         int newPageNum = -1;
         System.out.print("\nEnter the page number you are currently on: ");
@@ -1171,7 +1102,6 @@ public class ReadingBuddy {
     }
 
     public static void manageViewReadBooks(){
-        //menu of read books with to select to rate or exit loop/menu
         boolean stayReadBooks = true;
         int numSelected;
         int i;
@@ -1231,8 +1161,7 @@ public class ReadingBuddy {
                         bookToAdd = addNewBook(title, author);
                     } else {
                         bookToAdd = searchMatches.get(0);
-                    }//will add other else to manage searches with multiple matches when adding search by only title or author/current else will become "else if(searchMatches.size()==1)"
-                    
+                    }
                     //add to currently reading + check if in currently reading
                     alreadyInCurrentBooks = currentUser.checkIfInCurrentBooks(bookToAdd.getID());
                     if (alreadyInCurrentBooks >= 0){
@@ -1278,7 +1207,6 @@ public class ReadingBuddy {
     }
 
     //search for a specific book in all books
-    //EXPAND FUNCTION TO BE ABLE TO SEARCH BY TITLE OR AUTHOR ONLY (returning array list for easy expansion of function to more matches)
     public static ArrayList<Book> searchAllBooks(String title, String author){
         ArrayList<Book> matches = new ArrayList<Book>();
         for(int i = 0; i < allBooks.size(); i++){
@@ -1299,7 +1227,7 @@ public class ReadingBuddy {
         return matches;
     }
 
-    //NEW SPRINT3: (misc--ability to find a specific searchpost (connected to a specific user))
+    //find a specific searchpost (connected to a specific user)
     public static SearchPost searchForSpecificSearchPost(String title, String author, String username){
         
         for(int i = 0; i < allSearchPosts.size(); i++){
@@ -1330,7 +1258,6 @@ public class ReadingBuddy {
         return bookToAdd;
     }
 
-    //ADD USER
     //return false if match, return true if available
     public static boolean checkUsernameAvailability(String userName, ArrayList<String[]> usersList){
         for(int i = 0; i < usersList.size(); i++){
@@ -1359,7 +1286,6 @@ public class ReadingBuddy {
         return usersList;
     }
 
-    //LOGIN
     public static void login(ArrayList<String[]> usersList){
         boolean keepTrying = true;
         String username;
@@ -1396,7 +1322,7 @@ public class ReadingBuddy {
         return -1;
     }
 
-    //!!!!!NEW: the menu of all a user's book groups
+    //menu of all a user's book groups
     public static void bookGroupsManager(){
         boolean stayInMenu = true;
         if(currentUser.getBookGroups().size() > 0){
@@ -1428,7 +1354,7 @@ public class ReadingBuddy {
         }
     }
 
-    //!!!!NEW: displays book group info to user, options to create a post, read posts, update current page
+    //displays book group info to user, options to create a post, read posts, update current page
     public static void viewBookGroup(BookGroup currentGroup){
         boolean stayIn = true;
         int menuSelection;
@@ -1440,8 +1366,6 @@ public class ReadingBuddy {
             //NEW SPRINT3: ternary operator to display page number or "Done" depending on if user done or not (left old commented out until tested)
             System.out.println("Your current page: " + (currentGroup.getUserIsDone(currentUser.getUsername())? "Done" : currentGroup.getUserPageNum(currentUser.getUsername())));
             System.out.println(bookBuddyName + "'s current page: " + (currentGroup.getUserIsDone(bookBuddyName) ? "Done" : currentGroup.getUserPageNum(bookBuddyName)));
-            //System.out.println("Your current page: " + currentGroup.getUserPageNum(currentUser.getUsername()));
-            //System.out.println(bookBuddyName + "'s current page: " + currentGroup.getUserPageNum(bookBuddyName));
             System.out.println("Posts in Group: " + currentGroup.getPosts().size());
             //NEW SPRINT3: adding option to end a book group
             System.out.print("""
@@ -1589,7 +1513,6 @@ public class ReadingBuddy {
                 case 3:
                     bookGroupsManager();
                     break;
-                
                 case 4:
                     isLoggedIn = false;
                     break;

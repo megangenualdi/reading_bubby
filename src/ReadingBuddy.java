@@ -561,7 +561,6 @@ public class ReadingBuddy {
             createGroup = true;
         }
         if(createGroup){
-            updateBookBuddysEntry(newGroup);
             updateCurrentlyReading();
             currentUser.addBookGroup(newGroup);
             allBookGroups.add(newGroup);
@@ -735,10 +734,10 @@ public class ReadingBuddy {
                         2. Enter a book (title and author)
                         3. Select a book from the list of books
                         4. View all \"Book Buddy Wanted\" Posts
+                        5. Manage your \"Book Buddy Wanted\" posts
 
-                        Enter your selection from the menu, or enter 0 to return to the Main Menu:
-                        """);
-            menuSelection = validateMenuSelection(0, 4);
+                        Enter your selection from the menu, or enter 0 to return to the Main Menu: """);
+            menuSelection = validateMenuSelection(0, 5);
             if(menuSelection == 1){
                 bookBuddyFromCurrentlyReading();
             } else if(menuSelection == 2){
@@ -747,6 +746,8 @@ public class ReadingBuddy {
                 chooseFromAllBooks();
             }else if (menuSelection == 4){
                 viewAllSearchPosts();
+            }else if(menuSelection == 5){
+                viewAndManageOwnSearchPosts();
             }else{
                 returnToMenu = false;
             }
@@ -756,6 +757,51 @@ public class ReadingBuddy {
     //TO MOVE LATER FOR ORGANIZATION
     //TO MOVE LATER FOR ORGANIZATION
     //TO MOVE LATER FOR ORGANIZATION
+
+    public static void viewAndManageOwnSearchPosts(){
+        //get all search posts by user
+        ArrayList<SearchPost> usersPosts = new ArrayList<SearchPost>();
+        int menuSelection;
+        int menu2Selection;
+        for(int i = 0; i < allSearchPosts.size(); i++){
+            if(currentUser.getUsername().equals(allSearchPosts.get(i).getPoster())){
+                usersPosts.add(allSearchPosts.get(i));
+            }
+        }
+        //display search posts
+        boolean stayIn = true;
+        while (stayIn) {
+            if(usersPosts.size() == 0){
+                System.out.println("\nYou currently have no \"Book Buddy Wanted\" posts.\n\n");
+                stayIn = false;
+            }else{
+                System.out.println("Your Book Buddy Wanted Posts:\n");
+                for(int x = 1; x <= usersPosts.size(); x++){
+                    System.out.println(x + ". " + usersPosts.get(x-1).getTitle() + " by " + usersPosts.get(x-1).getAuthor());
+                    System.out.println("   Posted on " + usersPosts.get(x-1).getWhenPosted() + "\n");
+                }
+                System.out.print("""
+                        \nEnter the number corresponding to a Book Buddy Wanted post to delete it,
+                        or enter 0 to return to the \"Find a Book Buddy\" menu:  """);
+                menuSelection = validateMenuSelection(0, usersPosts.size());
+                if(menuSelection == 0){
+                    stayIn = false;
+                }else{
+                    menu2Selection = confirmSelection("\nAre you sure you want to delete the search post for "
+                     + usersPosts.get(menuSelection-1).getTitle() + " by " + usersPosts.get(menuSelection-1).getAuthor()
+                      + "?\n");
+                    if(menu2Selection == 1){
+                        //also update the currently reading to remove the search post
+                        CurrentBook toUpdate = currentUser.getSpecificCurrentBook(usersPosts.get(menuSelection-1).getBookID());
+                        toUpdate.setSearchPostOff();
+                        updateCurrentlyReading();
+                        removeSearchPost(usersPosts.get(menuSelection-1));
+                        usersPosts.remove(menuSelection-1);
+                    }
+                }
+            }
+        }
+    }
 
     public static boolean checkForOwnSearchPost(ArrayList<SearchPost> toCheck, String title, String author){
         for(int i = 0; i < toCheck.size(); i++){
@@ -786,6 +832,9 @@ public class ReadingBuddy {
         return menuSelection;
     }
 
+
+    //!!! debug / figure out why just looping through choices when selection made
+    //NEW SPRINT4 - UPDATED --reworking structure of function for fixing bug
     public static void chooseFromAllBooks(){
         boolean stayInMenu = true;
         boolean followUp = false;
@@ -804,40 +853,49 @@ public class ReadingBuddy {
             System.out.print("\nEnter the corresponding number to select a book to find a book buddy (make a Book Buddy" +
              "Wanted post or answer someone else's), or 0 to return to the menu:");
             menuSelection = validateMenuSelection(0, allBooks.size());
+            //TESTING
+            System.out.println("!menuSelection = " + menuSelection + "\n");
+
             if(menuSelection > 0){
                 //!!!!!MOVE THE CHECKING OF IF OPEN SEARCH TO BEFORE
+                //TESTING
+                System.out.println("in menuSelection > 0 if");
+
                 selectedBook = allBooks.get(menuSelection-1);
-                posts = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
-                if(posts.size() > 0){
-                    if(currentUser.checkIfInCurrentBooks(selectedBook.getID()) >= 0){
-                        currentSelectedBook = currentUser.getSpecificCurrentBook(selectedBook.getID());
-                        System.out.println("\n" + (currentSelectedBook.getGroup() > 0) + "\n");
-                        if(currentSelectedBook.getHasOpenSearch()){
-                            System.out.println("\nLooks like you already have a post for that book!\n");
-                            followUp = true;
-                        }else if(currentSelectedBook.getGroup() > 0){
-                            System.out.println("\nYou are already in a book group for that book!\n");
-                            followUp = true;
-                        }else{
-                            seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
-                            if(seePosts == 1){
-                                menu2Selection = displayAndGetSearchPostSelection(posts);
-                                if (menu2Selection > 0 && menu2Selection <= posts.size()){
-                                    createNewBookGroup(posts.get(menuSelection-1));
-                                    stayInMenu = false;
-                                }
+                if(currentUser.checkIfInCurrentBooks(selectedBook.getID()) >= 0){
+                    currentSelectedBook = currentUser.getSpecificCurrentBook(selectedBook.getID());
+                    if(currentSelectedBook.getHasOpenSearch()){
+                        System.out.println("\nLooks like you already have a post for that book!\n");
+                        followUp = true;
+                    }else if(currentSelectedBook.getGroup() > 0){
+                        System.out.println("\nYou are already in a book group for that book!\n");
+                        followUp = true;
+                    }
+                }
+                if(followUp == false){
+                    posts = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
+                    if(posts.size() > 0){
+                        //TESTING
+                        System.out.println("in posts.size() > 0 if");
+
+                        seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
+                        if(seePosts == 1){
+                            menu2Selection = displayAndGetSearchPostSelection(posts);
+                            if (menu2Selection > 0 && menu2Selection <= posts.size()){
+                                createNewBookGroup(posts.get(menuSelection-1));
+                                stayInMenu = false;
                             }
                         }
                     }
-                }
-                if(posts.size() == 0 || seePosts == 2 || menu2Selection == (posts.size()+1)){
-                    menu3Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
-                        selectedBook.getTitle() + " by " + selectedBook.getAuthor() + "?");
-                    if(menu3Selection == 1){
-                        createNewSearchPost(selectedBook);
-                        stayInMenu = false;
-                        followUp = false;
-                        System.out.println("Posted!\n\n");
+                    if(posts.size() == 0 || seePosts == 2 || menu2Selection == (posts.size()+1)){
+                        menu3Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
+                            selectedBook.getTitle() + " by " + selectedBook.getAuthor() + "?");
+                        if(menu3Selection == 1){
+                            createNewSearchPost(selectedBook);
+                            stayInMenu = false;
+                            followUp = false;
+                            System.out.println("Posted!\n\n");
+                        }
                     }
                 }
                 if(followUp || menu3Selection == 2){
@@ -846,6 +904,8 @@ public class ReadingBuddy {
                         stayInMenu = false;
                     }
                 }
+            }else{
+                stayInMenu = false;
             }
         }
     }
@@ -877,21 +937,30 @@ public class ReadingBuddy {
         }
     }
 
-
-
     public static void enterSearchPostByBook(){
         int seePosts = -1;
+        boolean endNow = false;
         String title = checkStrInput("Enter the book's title: ");
         String author = checkStrInput("Enter the name of the book's author: ");
         //check if that book exists in data already
+        //This array should only have one item (if any) because search by title and author
         ArrayList<Book> searchMatches = searchAllBooks(title, author);
+        int bookIndex = currentUser.checkIfInCurrentBooks(searchMatches.get(0).getID());
         if(searchMatches.size() > 0){
             int menuSelection = -1;
+            if(bookIndex >= 0){
+                //!!!NEW SPRINT4: make sure user not already in a book group for that book
+                if(currentUser.getCurrentlyReading().get(bookIndex).getGroup() > 0){
+                    System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
+                    endNow = true;
+                }
+            }
             ArrayList<SearchPost> postMatches = searchForSearchPosts(title, author);
-            if(postMatches.size() > 0){
+            if(postMatches.size() > 0 && endNow == false){
                 boolean alreadyHasPost = checkForOwnSearchPost(postMatches, title, author);
                 if(alreadyHasPost){
                     System.out.println("\nLooks like you already have a post for that book!\n");
+                    endNow = true;
                 }else{
                     seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
                     if(seePosts == 1){
@@ -902,7 +971,7 @@ public class ReadingBuddy {
                     }
                 }
             }
-            if(postMatches.size() == 0 || menuSelection == postMatches.size()+1 || seePosts == 2){
+            if((postMatches.size() == 0 || menuSelection == postMatches.size()+1 || seePosts == 2) && endNow == false){
                 int menu2Selection = confirmSelection("Create a \"Book Buddy Wanted\" post for reading " +
                 title + " by " + author + "?");
                 if(menu2Selection == 1){

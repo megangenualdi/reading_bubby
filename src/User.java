@@ -8,11 +8,11 @@
 package reading_bubby.src;
 
 import java.io.*;
-import java.time.LocalDate;
+//import java.time.LocalDate;
 import java.util.*;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
+//import com.opencsv.CSVReader;
+//import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 
 public class User {
@@ -63,7 +63,7 @@ public class User {
 
     public void initialSetBookGroups(){
         ArrayList<Integer> groupNums = ReadingBuddy.initialGetBookGroups();
-        ArrayList<GroupPost> myGroupPosts = getGroupPostData(groupNums);
+        ArrayList<GroupPost> myGroupPosts = ReadingBuddy.getGroupPostData(groupNums);
         //counter so if all posts have been sorted into groups can stop early
         int counter = 0;
         for(BookGroup i : bookGroups){
@@ -84,8 +84,8 @@ public class User {
 
     //initialGetBookGroups() MOVED TO ReadingBuddy.java
 
-    //gets all posts for groups a user is in
-    public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
+    //MOVED TO ReadingBuddy.java
+   /*  public ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
         ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
         try { 
             FileReader filereader = new FileReader("reading_bubby/appdata/group_posts.csv"); 
@@ -106,7 +106,7 @@ public class User {
             e.printStackTrace();
             return userGroupPosts;
         } 
-    }
+    } */
 
     public void addBookGroup(BookGroup toAdd){
         bookGroups.add(toAdd);
@@ -126,7 +126,7 @@ public class User {
             }
         }
         //should never happen
-        return new BookGroup(-1, -1, "", "", "", "", -1, -1);
+        return new BookGroup(-1, -1, "", "", "", "", -1, -1, false, false);
     }
 
     public void addToCurrentlyReading(CurrentBook bookToAdd){
@@ -134,15 +134,16 @@ public class User {
         addToCurrentlyReadingCsv(bookToAdd);
     }
 
-    public boolean checkIfInCurrentBooks(int idToCheck){
+    //NEW SPRINT3 - CHANGED TO RETURN THE INDEX NUMBER OF BOOK IN CURRENTLYREADING
+    public int checkIfInCurrentBooks(int idToCheck){
         if(currentlyReading.size() > 0){
             for(int i = 0; i < currentlyReading.size(); i++){
                 if(idToCheck == currentlyReading.get(i).getID()){
-                    return true;
+                    return i;
                 }
             }
         }
-        return false;
+        return -1;
     }
 
     public void addToCurrentlyReadingCsv(CurrentBook bookToAdd){
@@ -150,7 +151,8 @@ public class User {
             FileWriter filewriter = new FileWriter("reading_bubby/appdata/currently_reading.csv", true);
             CSVWriter writer = new CSVWriter(filewriter);
             String[] bookInfo = {Integer.toString(bookToAdd.getID()), bookToAdd.getTitle(), bookToAdd.getAuthor(), 
-                username, Integer.toString(0), Integer.toString(-1), Integer.toString(-1), "null", String.valueOf(bookToAdd.getHasOpenSearch())};
+                username, Integer.toString(0), Integer.toString(-1), Integer.toString(-1), "null", 
+                String.valueOf(bookToAdd.getHasOpenSearch()), String.valueOf(bookToAdd.getIsDone())};
             writer.writeNext(bookInfo);
             writer.close();
         }
@@ -209,6 +211,16 @@ public class User {
             }
         }
         return new CurrentBook(-1, "", "", "");
+    }
+
+    //NEW SPRINT3
+    public void removeBookGroup(BookGroup toRemove){
+        for(int i = 0; i < bookGroups.size(); i++){
+            if(bookGroups.get(i).getID() == toRemove.getID()){
+                bookGroups.remove(i);
+                break;
+            }
+        }
     }
 
 }

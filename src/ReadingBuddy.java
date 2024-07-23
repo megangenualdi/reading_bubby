@@ -27,6 +27,8 @@ public class ReadingBuddy {
     static boolean isLoggedIn = false;
     static ArrayList<SearchPost> allSearchPosts = new ArrayList<SearchPost>();
     static ArrayList<BookGroup> allBookGroups = new ArrayList<BookGroup>();
+    //NEW SPRINT3
+    static ArrayList<GroupPost> allGroupPosts = new ArrayList<GroupPost>();
 
     //INPUT VALIDATION (and helpers)
     public static int validateMenuSelection(int minVal, int maxVal){
@@ -152,7 +154,7 @@ public class ReadingBuddy {
             List<String[]> allData = csvReader.readAll(); 
             CurrentBook tempCurrentBook;
             for (String[] row : allData) {
-                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7], Boolean.valueOf(row[8]));
+                tempCurrentBook = new CurrentBook(Integer.parseInt(row[0]), row[1], row[2], row[3], Integer.parseInt(row[4]), Integer.parseInt(row[5]), Integer.parseInt(row[6]), row[7], Boolean.valueOf(row[8]), Boolean.valueOf(row[9]));
                 allCurrentBooks.add(tempCurrentBook);
             }
         } 
@@ -233,7 +235,7 @@ public class ReadingBuddy {
             BookGroup tempGroup;
             for (String[] row : allData) {
                 tempGroup = new BookGroup(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], row[3], row[4],
-                 row[5], Integer.parseInt(row[6]), Integer.parseInt(row[7]));
+                 row[5], Integer.parseInt(row[6]), Integer.parseInt(row[7]), Boolean.valueOf(row[8]), Boolean.valueOf(row[9]));
                 allBookGroups.add(tempGroup);
                 if(row[4].equals(currentUser.getUsername()) || row[5].equals(currentUser.getUsername())){
                     currentUser.addBookGroup(tempGroup);
@@ -248,26 +250,122 @@ public class ReadingBuddy {
         }
     }
 
+    //NEW SPRINT3 - MOVED from User.java
+    public static ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
+        ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
+        try { 
+            FileReader filereader = new FileReader("reading_bubby/appdata/group_posts.csv"); 
+            // create csvReader object and skip first Line 
+            CSVReader csvReader = new CSVReaderBuilder(filereader) 
+                                    .withSkipLines(1) 
+                                    .build(); 
+            List<String[]> allData = csvReader.readAll();
+            GroupPost tempPost;
+            for (String[] row : allData) {
+                tempPost = new GroupPost(row[0], row[1], Integer.parseInt(row[2]), LocalDate.parse(row[3]));
+                allGroupPosts.add(tempPost);
+                if(groupNums.contains(Integer.valueOf(row[2]))){
+                    userGroupPosts.add(tempPost);
+                }
+            }
+            return userGroupPosts;
+        } 
+        catch (Exception e) { 
+            e.printStackTrace();
+            return userGroupPosts;
+        } 
+    }
+
     //FUNCTIONS FOR UPDATING DATA
-    public static void removeCurrentBook(int idxForUserArr, CurrentBook toRemove){
+
+    //NEW SPRINT3: remove the posts that are related to a book group
+    public static void removeGroupsPosts(BookGroup groupToRemove){
+        //remove from data file
+        File file = new File("reading_bubby/appdata/group_posts.csv"); 
+        try { 
+            FileWriter outputfile = new FileWriter(file); 
+            CSVWriter writer = new CSVWriter(outputfile);
+            List<String[]> data = new ArrayList<String[]>();
+            data.add(new String[] {"username","content","group_id","day_posted"});
+            for(int x = 0; x < allGroupPosts.size(); x++){
+                if(groupToRemove.getID() == allGroupPosts.get(x).getGroupID()){
+                    allGroupPosts.remove(x);
+                } else {
+                    data.add(new String[] {allGroupPosts.get(x).getUserName(), allGroupPosts.get(x).getContent(),
+                     Integer.toString(allGroupPosts.get(x).getGroupID()), allGroupPosts.get(x).getDayPosted().toString()});
+                }
+            }
+            writer.writeAll(data); 
+            // closing writer connection 
+            writer.close(); 
+        } 
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+    }
+
+    //NEW SPRINT3: remove a bookgroup from allBookGroups and grom the book_groups.csv file
+    public static void removeBookGroup(BookGroup toRemove){
+        //remove from data file
+        File file = new File("reading_bubby/appdata/book_groups.csv"); 
+        try { 
+            FileWriter outputfile = new FileWriter(file); 
+            CSVWriter writer = new CSVWriter(outputfile);
+            List<String[]> data = new ArrayList<String[]>();
+            data.add(new String[] {"group_id","book_id","title","author","member1","member2","pages_read1","pages_read2","is_done1","is_done2"});
+            for(int x = 0; x < allBookGroups.size(); x++){
+                if(toRemove.getID() == allBookGroups.get(x).getID()){
+                    allBookGroups.remove(x);
+                } else {
+                    data.add(new String[] {Integer.toString(allBookGroups.get(x).getID()), Integer.toString(allBookGroups.get(x).getBookID()),
+                        allBookGroups.get(x).getTitle(), allBookGroups.get(x).getAuthor(), allBookGroups.get(x).getMembers().get(0), 
+                        allBookGroups.get(x).getMembers().get(1), Integer.toString(allBookGroups.get(x).getCurrentPages().get(0)),
+                        Integer.toString(allBookGroups.get(x).getCurrentPages().get(1)), Boolean.toString(allBookGroups.get(x).getIsDone().get(0)),
+                        Boolean.toString(allBookGroups.get(x).getIsDone().get(1))});
+                }
+            }
+            writer.writeAll(data); 
+            // closing writer connection 
+            writer.close(); 
+        } 
+        catch (IOException e) { 
+            e.printStackTrace(); 
+        } 
+    }
+
+    //NEW SPRINT3: updated to be able to use with currentUser's currentbook or their book buddy's
+    public static void removeCurrentBook(CurrentBook toRemove){
         //remove from data file
         File file = new File("reading_bubby/appdata/currently_reading.csv"); 
         try { 
             FileWriter outputfile = new FileWriter(file); 
             CSVWriter writer = new CSVWriter(outputfile);
             List<String[]> data = new ArrayList<String[]>();
-            data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy"});
+            data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy","has_open_search","is_done"});
             for(int x = 0; x < allCurrentBooks.size(); x++){
                 if((toRemove.getID() == allCurrentBooks.get(x).getID()) && (toRemove.getUsername().equals(allCurrentBooks.get(x).getUsername()))){
                     //when the selected book is found do not write it to the data but remove it from the user's ArrayList and allCurrentBooks Arraylist
-                    currentUser.removeFromCurrentlyReading(idxForUserArr);
+                    //NEW SPRINT 3 (misc--should delete search post if has one)
+                    if(toRemove.getHasOpenSearch()){
+                        SearchPost postToDel = searchForSpecificSearchPost(toRemove.getTitle(), toRemove.getAuthor(),
+                         toRemove.getUsername());
+                        //below if should not be necessary because the if currently in has checked if there is an associated search post
+                        if(postToDel.getBookID() == -1){
+                            removeSearchPost(postToDel);
+                        }
+                    }
+                    //remove from currentlyReading if for currentUser's book
+                    if(toRemove.getUsername().equals(currentUser.getUsername())){
+                        currentUser.removeFromCurrentlyReading(currentUser.checkIfInCurrentBooks(toRemove.getID()));
+                    }
                     allCurrentBooks.remove(x);
                 } else {
                     data.add(new String[] {Integer.toString(allCurrentBooks.get(x).getID()), 
                         allCurrentBooks.get(x).getTitle(), allCurrentBooks.get(x).getAuthor(), 
                         allCurrentBooks.get(x).getUsername(), Integer.toString(allCurrentBooks.get(x).getPage()), 
                         Integer.toString(allCurrentBooks.get(x).getCh()), 
-                        Integer.toString(allCurrentBooks.get(x).getGroup()), allCurrentBooks.get(x).getBB()});
+                        Integer.toString(allCurrentBooks.get(x).getGroup()), allCurrentBooks.get(x).getBB(), 
+                        Boolean.toString(allCurrentBooks.get(x).getHasOpenSearch()), Boolean.toString(allCurrentBooks.get(x).getIsDone())});
                 }
             }
             writer.writeAll(data); 
@@ -285,12 +383,12 @@ public class ReadingBuddy {
             FileWriter outputfile = new FileWriter(file); 
             CSVWriter writer = new CSVWriter(outputfile); 
             List<String[]> data = new ArrayList<String[]>();
-            data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy","has_open_search"});
+            data.add(new String[] {"book_id","title","author","username","current_page","current_chapter","group_id","book_buddy","has_open_search","is_done"});
             for(int x = 0; x < allCurrentBooks.size(); x++){
                 data.add(new String[] {Integer.toString(allCurrentBooks.get(x).getID()), allCurrentBooks.get(x).getTitle(), 
                     allCurrentBooks.get(x).getAuthor(), allCurrentBooks.get(x).getUsername(), Integer.toString(allCurrentBooks.get(x).getPage()),
                     Integer.toString(allCurrentBooks.get(x).getCh()), Integer.toString(allCurrentBooks.get(x).getGroup()),
-                    allCurrentBooks.get(x).getBB(), Boolean.toString(allCurrentBooks.get(x).getHasOpenSearch())});
+                    allCurrentBooks.get(x).getBB(), Boolean.toString(allCurrentBooks.get(x).getHasOpenSearch()), Boolean.toString(allCurrentBooks.get(x).getIsDone())});
             }
             writer.writeAll(data); 
             // closing writer connection 
@@ -308,12 +406,13 @@ public class ReadingBuddy {
             FileWriter outputfile = new FileWriter(file); 
             CSVWriter writer = new CSVWriter(outputfile); 
             List<String[]> data = new ArrayList<String[]>();
-            data.add(new String[] {"group_id","book_id","title","author","member1","member2","pages_read1","pages_read2"});
+            data.add(new String[] {"group_id","book_id","title","author","member1","member2","pages_read1","pages_read2","is_done1","is_done2"});
             for(int x = 0; x < allBookGroups.size(); x++){
                 data.add(new String[] {Integer.toString(allBookGroups.get(x).getID()), Integer.toString(allBookGroups.get(x).getBookID()),
                     allBookGroups.get(x).getTitle(), allBookGroups.get(x).getAuthor(), allBookGroups.get(x).getMembers().get(0),
                     allBookGroups.get(x).getMembers().get(1), Integer.toString(allBookGroups.get(x).getCurrentPages().get(0)),
-                    Integer.toString(allBookGroups.get(x).getCurrentPages().get(1))});
+                    Integer.toString(allBookGroups.get(x).getCurrentPages().get(1)), 
+                    Boolean.toString(allBookGroups.get(x).getIsDone().get(0)), Boolean.toString(allBookGroups.get(x).getIsDone().get(1))});
             }
             writer.writeAll(data); 
             writer.close(); 
@@ -391,16 +490,24 @@ public class ReadingBuddy {
         return allUsers;
     }
 
-    public static void updateBookBuddysEntry(BookGroup groupInfo){
+    //NEW SPRINT3
+    public static CurrentBook getSpecificCurrentBook(String userName, int bookID){
         for(int i = 0; i < allCurrentBooks.size(); i++){
-            if(allCurrentBooks.get(i).getUsername().equals(groupInfo.getBookBuddyName(currentUser.getUsername())) &&
-                allCurrentBooks.get(i).getID() == groupInfo.getBookID()){
-                allCurrentBooks.get(i).setSearchPostOff();
-                allCurrentBooks.get(i).setBookBuddy(currentUser.getUsername());
-                allCurrentBooks.get(i).setGroup(groupInfo.getID());
-                break;
+            if(allCurrentBooks.get(i).getUsername().equals(userName) &&
+            allCurrentBooks.get(i).getID() == bookID){
+                return allCurrentBooks.get(i);
             }
         }
+        return new CurrentBook(-1, "", "", "");
+    }
+
+    //NEW SPRINT3 - UPDATED
+    public static void updateBookBuddysEntry(BookGroup groupInfo){
+        CurrentBook toUpdate = getSpecificCurrentBook(groupInfo.getBookBuddyName(currentUser.getUsername()), groupInfo.getBookID());
+        toUpdate.setSearchPostOff();
+        toUpdate.setBookBuddy(currentUser.getUsername());
+        toUpdate.setGroup(groupInfo.getID());
+        updateCurrentlyReading();
     }
 
     public static void removeSearchPost(SearchPost toRemove){
@@ -434,7 +541,7 @@ public class ReadingBuddy {
         boolean createGroup;
         //create group but do not increment the nextUserBookGroup number until/only increment if okayed to make group
         BookGroup newGroup = new BookGroup(nextUserBookGroup.get(2), wantedPost, currentUser.getUsername());
-        if(currentUser.checkIfInCurrentBooks(wantedPost.getBookID())){
+        if(currentUser.checkIfInCurrentBooks(wantedPost.getBookID()) >= 0){
             CurrentBook toUpdate = currentUser.getSpecificCurrentBook(wantedPost.getBookID());
             if(toUpdate.getGroup() > 0){
                 System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
@@ -448,7 +555,7 @@ public class ReadingBuddy {
         }else{
             CurrentBook toAdd = new CurrentBook(newGroup.getBookID(), newGroup.getTitle(), newGroup.getAuthor(), 
                 currentUser.getUsername(), 0, -1, newGroup.getID(), newGroup.getBookBuddyName(currentUser.getUsername()),
-                 false);
+                 false, false);
             allCurrentBooks.add(toAdd);
             currentUser.addToCurrentlyReading(toAdd);
             createGroup = true;
@@ -457,13 +564,14 @@ public class ReadingBuddy {
             updateBookBuddysEntry(newGroup);
             updateCurrentlyReading();
             currentUser.addBookGroup(newGroup);
+            allBookGroups.add(newGroup);
             removeSearchPost(wantedPost);
             try{
                 FileWriter filewriter = new FileWriter("reading_bubby/appdata/book_groups.csv", true);
                 CSVWriter writer = new CSVWriter(filewriter);
                 String[] groupInfo = {Integer.toString(nextUserBookGroup.get(2)), Integer.toString(wantedPost.getBookID()),
                     wantedPost.getTitle(), wantedPost.getAuthor(), wantedPost.getPoster(), currentUser.getUsername(), 
-                    Integer.toString(0), Integer.toString(0)};
+                    Integer.toString(0), Integer.toString(0), Boolean.toString(false), Boolean.toString(false)};
                 writer.writeNext(groupInfo);
                 writer.close();
                 incrementNextIdNums(2);
@@ -496,7 +604,7 @@ public class ReadingBuddy {
         CurrentBook toUpdate;
         boolean addPost;
             //CHECK IF ALREADY HAVE A BOOK BUDDY/GROUP FOR THIS BOOK
-        if(currentUser.checkIfInCurrentBooks(toAdd.getID())){
+        if(currentUser.checkIfInCurrentBooks(toAdd.getID()) >= 0){
             toUpdate = currentUser.getSpecificCurrentBook(toAdd.getID());
             addPost = checkBeforeCreateSearchPost(toUpdate);
             if(addPost){
@@ -701,7 +809,7 @@ public class ReadingBuddy {
                 selectedBook = allBooks.get(menuSelection-1);
                 posts = searchForSearchPosts(selectedBook.getTitle(), selectedBook.getAuthor());
                 if(posts.size() > 0){
-                    if(currentUser.checkIfInCurrentBooks(selectedBook.getID())){
+                    if(currentUser.checkIfInCurrentBooks(selectedBook.getID()) >= 0){
                         currentSelectedBook = currentUser.getSpecificCurrentBook(selectedBook.getID());
                         System.out.println("\n" + (currentSelectedBook.getGroup() > 0) + "\n");
                         if(currentSelectedBook.getHasOpenSearch()){
@@ -897,6 +1005,7 @@ public class ReadingBuddy {
                     System.out.println((""));
                 }
                 //!!!NEW: ADDING THE OPTION TO UPDATE PAGE NUMBER 
+                //!!!FIX: if in book group, warn user that removing book will end their book group/confirm with user, edit buddy's currentbook, send notification etc
                 System.out.print("To update your current page, mark a book as finished, or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0: ");
                 numSelected = validateMenuSelection(0, currentUser.getCurrentlyReading().size());
                 if(numSelected == 0){
@@ -925,15 +1034,35 @@ public class ReadingBuddy {
                             currentUser.getUsername());
                             currentUser.addToReadBooks(toAdd);
                             allReadBooks.add(toAdd);
-                        } else {
-                            System.out.println("\n" + selectedBook.getTitle() + " is already in your Read Books\n");
                         }
-                        removeCurrentBook((numSelected-1), selectedBook);
-                        //later will need to add more to preserve and update group relationship
+                        //NEW SPRINT3: only remove book if NOT in book group
+                        if(selectedBook.getGroup() < 0){
+                            removeCurrentBook(selectedBook);
+                        }else{
+                            //if in a book group just set+update isDone attribute
+                            selectedBook.setIsDone(true);
+                            updateCurrentlyReading();
+                            //!!!FIX: update tracking of doneness in book group
+                            BookGroup groupToUpdate = currentUser.getBookGroup(selectedBook.getGroup());
+                            groupToUpdate.setUserIsDone(currentUser.getUsername());
+                            updateBookGroups();
+                        }
                     } else if(num2Selected == 3){
-                        removeCurrentBook((numSelected-1), selectedBook);
-                        System.out.println("\n" + selectedBook.getTitle() + " has been removed from your Currently Reading\n");
-                        //!!!later will need to add more to deal with potential group membership
+                        int confirmation1 = -1;
+                        if(selectedBook.getGroup() > 0){
+                            confirmation1 = confirmSelection("You are in a book group for this book. Removing this book will end the book group. Do you still want to remove the book?");
+                            if(confirmation1 == 1){
+                                removeCurrentBook(selectedBook);
+                                //remove group
+                                BookGroup toRemove = currentUser.getBookGroup(selectedBook.getGroup());
+                                if(toRemove.getID() > 0){
+                                    endBookGroup(toRemove);
+                                }
+                            }
+                        }else{
+                            System.out.println("\n" + selectedBook.getTitle() + " has been removed from your Currently Reading\n");
+                            removeCurrentBook(selectedBook);
+                        }   
                     }
                     //if 4 loop will just keep going
                 }
@@ -1022,7 +1151,7 @@ public class ReadingBuddy {
             Book bookToAdd;
             CurrentBook toAdd;
             int confirmation;
-            boolean alreadyInCurrentBooks;
+            int alreadyInCurrentBooks;
             if(menuSelection == 1){
                 String title = checkStrInput("Enter the book's title:");
                 String author = checkStrInput("Enter the name of the book's author:\n");
@@ -1037,7 +1166,7 @@ public class ReadingBuddy {
                     
                     //add to currently reading + check if in currently reading
                     alreadyInCurrentBooks = currentUser.checkIfInCurrentBooks(bookToAdd.getID());
-                    if (alreadyInCurrentBooks){
+                    if (alreadyInCurrentBooks >= 0){
                         System.out.println("\n" + bookToAdd.getTitle() + " by " + bookToAdd.getAuthor() + 
                             "is already in your Currently Reading\n");
                     } else {
@@ -1062,7 +1191,7 @@ public class ReadingBuddy {
                         bookToAdd.getAuthor() + " to your Currently Reading?"));
                     if(confirmation == 1){
                         alreadyInCurrentBooks = currentUser.checkIfInCurrentBooks(bookToAdd.getID());
-                        if (alreadyInCurrentBooks){
+                        if (alreadyInCurrentBooks >= 0){
                             System.out.println("\n" + bookToAdd.getTitle() + " by " + bookToAdd.getAuthor() + 
                             "is already in your Currently Reading");
                         } else {
@@ -1099,6 +1228,18 @@ public class ReadingBuddy {
             }
         }
         return matches;
+    }
+
+    //NEW SPRINT3: (misc--ability to find a specific searchpost (connected to a specific user))
+    public static SearchPost searchForSpecificSearchPost(String title, String author, String username){
+        
+        for(int i = 0; i < allSearchPosts.size(); i++){
+            if(allSearchPosts.get(i).getTitle().equals(title) && allSearchPosts.get(i).getAuthor().equals(author)
+             && allSearchPosts.get(i).getPoster().equals(username)){
+                return allSearchPosts.get(i);
+            }
+        }
+        return new SearchPost("", new Book(-1, "", ""));
     }
 
     //add book to all books arraylist and to books.csv, return book (with intention of adding to currently read)
@@ -1227,16 +1368,22 @@ public class ReadingBuddy {
             String bookBuddyName = currentGroup.getBookBuddyName(currentUser.getUsername());
             System.out.println("\n\n\nBook: " + currentGroup.getTitle() + " by " + currentGroup.getAuthor());
             System.out.println("Book Buddy: " + bookBuddyName);
-            System.out.println("Your current page: " + currentGroup.getUserPageNum(currentUser.getUsername()));
-            System.out.println(bookBuddyName + "'s current page: " + currentGroup.getUserPageNum(bookBuddyName));
+            //NEW SPRINT3: ternary operator to display page number or "Done" depending on if user done or not (left old commented out until tested)
+            System.out.println("Your current page: " + (currentGroup.getUserIsDone(currentUser.getUsername())? "Done" : currentGroup.getUserPageNum(currentUser.getUsername())));
+            System.out.println(bookBuddyName + "'s current page: " + (currentGroup.getUserIsDone(bookBuddyName) ? "Done" : currentGroup.getUserPageNum(bookBuddyName)));
+            //System.out.println("Your current page: " + currentGroup.getUserPageNum(currentUser.getUsername()));
+            //System.out.println(bookBuddyName + "'s current page: " + currentGroup.getUserPageNum(bookBuddyName));
             System.out.println("Posts in Group: " + currentGroup.getPosts().size());
+            //NEW SPRINT3: adding option to end a book group
             System.out.print("""
-                 \n1. Create a Post
+                 \n
+                1. Create a Post
                 2. View All Posts in Group
-                3. Update Current Page
-                4. Return to Book Groups menu:""");
-            menuSelection = validateMenuSelection(1, 4);
-            if(menuSelection == 4){
+                3. Update Your Current Page
+                4. End Book Group
+                5. Return to Book Groups menu:""");
+            menuSelection = validateMenuSelection(1, 5);
+            if(menuSelection == 5){
                 stayIn = false;
             }else if(menuSelection == 1){
                 currentGroup.addNewPost();
@@ -1249,7 +1396,7 @@ public class ReadingBuddy {
                 }else{
                     stayIn = false;
                 }
-            }else{
+            }else if(menuSelection == 3){
                 int newPageNum = getNewPageNum();
                 int doTheUpdate = confirmSelection(("\nUpdate the current page to " + newPageNum + "?"));
                 if(doTheUpdate == 1){
@@ -1259,8 +1406,81 @@ public class ReadingBuddy {
                     toUpdate.setCurrentPage(newPageNum);
                     updateCurrentlyReading();
                 }
+            }else if(menuSelection == 4){
+                //NEW SPRINT3
+                //confirm end group --> CAN ADD MORE LATER (TAILOR RESPONSES TO IF BOTH GROUP MEMBERS ARE DONE OR NOT ETC)
+                System.out.println("""
+                    You can continue a book group for as long as you would like, regardless of if one or both of you 
+                    has finished the book.""");
+                int endGroupConfirmation = confirmSelection("Are you sure you want to end this book group with " + bookBuddyName + "?");
+                if(endGroupConfirmation == 1){
+                    //adding extra level of confirmation that can be removed later
+                    int confirmation2 = confirmSelection("End book group?");
+                    if(confirmation2 == 1){
+                        handleEndBookGroupViaManager(currentGroup);
+                        stayIn = false;
+                    }
+                }
             }
         }
+    }
+
+    //NEW SPRINT3
+    public static void handleEndBookGroupViaManager(BookGroup toEnd){
+        int selection1;
+        int selection2;
+        CurrentBook usersCurrentBook = getSpecificCurrentBook(currentUser.getUsername(), toEnd.getBookID());
+        if(toEnd.getUserIsDone(currentUser.getUsername())){
+            removeCurrentBook(usersCurrentBook);
+        }else{
+            selection1 = confirmSelection("Did you finish the book? ");
+            if(selection1 == 1){
+                //add to read books (if not there)
+                boolean alreadyInRead = currentUser.checkIfInReadBooks(usersCurrentBook.getID());
+                if(!alreadyInRead){
+                    ReadBook toAdd = new ReadBook(usersCurrentBook.getID(), usersCurrentBook.getTitle(), usersCurrentBook.getAuthor(), 
+                    currentUser.getUsername());
+                    currentUser.addToReadBooks(toAdd);
+                    allReadBooks.add(toAdd);
+                }
+                removeCurrentBook(usersCurrentBook);
+            }else{
+                selection2 = confirmSelection("Would you like to keep " + toEnd.getTitle() + " by " + toEnd.getAuthor() + " in your Currently Reading Books?");
+                if (selection2 == 1) {
+                    //update currentbook to remove book buddy and book number
+                    usersCurrentBook.setBookBuddy("null");
+                    usersCurrentBook.setGroup(-1);
+                    //ask if they would like to create a post to find a new book buddy
+                    int selection3 = confirmSelection("Would you like to create a new Book Buddy Wanted post for this book? ");
+                    if(selection3 == 1){
+                        //calls function to update currently_reading.csv
+                        createNewSearchPost(usersCurrentBook);
+                    }else{
+                        //if didn't make search post need to call to update the csv
+                        updateCurrentlyReading();
+                    }
+
+                } else {
+                    removeCurrentBook(usersCurrentBook);
+                }
+            }
+        }
+        endBookGroup(toEnd);
+    }
+
+    public static void endBookGroup(BookGroup toEnd){
+        String bookBuddyName = toEnd.getBookBuddyName(currentUser.getUsername());
+        CurrentBook buddysCurrentBook = getSpecificCurrentBook(bookBuddyName, toEnd.getBookID());
+        if(buddysCurrentBook.getIsDone()){
+            removeCurrentBook(buddysCurrentBook);
+        }else{
+            buddysCurrentBook.setGroup(-1);
+            buddysCurrentBook.setBookBuddy("null");
+            updateCurrentlyReading();
+        }
+        removeBookGroup(toEnd);
+        removeGroupsPosts(toEnd);
+        currentUser.removeBookGroup(toEnd);
     }
 
     public static void main(String[] args){

@@ -15,6 +15,8 @@ public class BookGroup {
     private ArrayList<String> members;
     private ArrayList<GroupPost> posts;
     private ArrayList<Integer> currentPages;
+    //NEW SPRINT3
+    private ArrayList<Boolean> isDone;
     
     public BookGroup(int id, SearchPost wantedPost, String member2){
         groupID = id;
@@ -28,9 +30,13 @@ public class BookGroup {
         currentPages = new ArrayList<Integer>();
         currentPages.add(Integer.valueOf(0));
         currentPages.add(Integer.valueOf(0));
+        //NEW SPRINT3
+        isDone = new ArrayList<Boolean>();
+        isDone.add(false);
+        isDone.add(false);
     }
 
-    public BookGroup(int id, int bID, String t, String a, String member1, String member2, int pagesRead1, int pagesRead2){
+    public BookGroup(int id, int bID, String t, String a, String member1, String member2, int pagesRead1, int pagesRead2, boolean isDone1, boolean isDone2){
         groupID = id;
         bookID = bID;
         title = t;
@@ -42,6 +48,10 @@ public class BookGroup {
         currentPages = new ArrayList<Integer>();
         currentPages.add(pagesRead1);
         currentPages.add(pagesRead2);
+        //NEW SPRINT3
+        isDone = new ArrayList<Boolean>();
+        isDone.add(isDone1);
+        isDone.add(isDone2);
     }
 
     public int getID(){
@@ -72,9 +82,27 @@ public class BookGroup {
         return currentPages;
     }
 
+    //NEW SPRINT3
+    public boolean getUserIsDone(String userName){
+        int idx = getUserArrPosition(userName);
+        return isDone.get(idx);
+    }
+
+    public void setUserIsDone(String userName){
+        isDone.set(getUserArrPosition(userName), true);
+    }
+
+    public ArrayList<Boolean> getIsDone(){
+        return isDone;
+    }
+
+
     public void updateCurrentPage(int newPageNum){
         //can only update own page number when logged in (index in memebers corresponds to position of that user's info in currentPages)
         int idxToUpdate = getUserArrPosition(ReadingBuddy.currentUser.getUsername());
+        //TESTING
+        System.out.println("idx: " + idxToUpdate + "   newpagenum: " + newPageNum);
+
         currentPages.set(idxToUpdate, newPageNum);
     }
 

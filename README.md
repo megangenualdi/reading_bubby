@@ -15,34 +15,36 @@ Cs-335 Software Engineering Project
 
 
 # File Structure
+
 Reading_Buddy
-|–– reading_bubby
-       |–– appdata
-       |    |–– book_groups.csv
-       |    |–– books.csv
-       |    |–– currently_reading.csv
-       |    |–– group_posts.csv
-       |    |–– next_id_nums.csv
-       |    |–– read_books.csv
-       |    |–– search_posts.csv
-       |    |–– users.csv
-       |
-       |–– lib
-       |    |–– commons-lang3-3.14.0-javadoc.jar
-       |    |–– commons-lang3-3.14.0-sources.jar
-       |    |–– commons-lang3-3.14.0-test-sources.jar
-       |    |–– commons-lang3-3.14.0-tests.jar
-       |    |–– commons-lang3-3.14.0.jar
-       |    |–– opencsv-5.9.jar
-       |
-       |–– README.md
-       |
-       |–– src
-       |    |–– BookGroup.java
-       |    |–– Book.java
-       |    |–– CurrentBook.java
-       |    |–– GroupPost.java
-       |    |–– ReadBook.java
-       |    |–– ReadingBuddy.java
-       |    |–– SearchPost.java
-       |    |–– User.java
+
+    |––reading_bubby
+         |–– appdata   
+         |    |–– book_groups.csv
+         |    |–– books.csv
+         |    |–– currently_reading.csv
+         |    |–– group_posts.csv
+         |    |–– next_id_nums.csv
+         |    |–– read_books.csv
+         |    |–– search_posts.csv
+         |    |–– users.csv
+         |
+         |–– lib
+         |    |–– commons-lang3-3.14.0-javadoc.jar
+         |    |–– commons-lang3-3.14.0-sources.jar
+         |    |–– commons-lang3-3.14.0-test-sources.jar
+         |    |–– commons-lang3-3.14.0-tests.jar
+         |    |–– commons-lang3-3.14.0.jar
+         |    |–– opencsv-5.9.jar
+         |
+         |–– README.md
+         |
+         |–– src
+         |    |–– BookGroup.java
+         |    |–– Book.java
+         |    |–– CurrentBook.java
+         |    |–– GroupPost.java
+         |    |–– ReadBook.java
+         |    |–– ReadingBuddy.java
+         |    |–– SearchPost.java
+         |    |–– User.java

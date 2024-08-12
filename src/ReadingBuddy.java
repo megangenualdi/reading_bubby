@@ -51,7 +51,7 @@ public class ReadingBuddy {
     //asks a yes/no question and returns the answer
     public static int confirmSelection(String question){
         System.out.println(question);
-        System.out.print("1. Yes\n2. No\nSelection: ");
+        System.out.print("1. Yes\n2. No\nEnter the number that corresponds to your menu selection: ");
         int selection = validateMenuSelection(1, 2);
         return selection;
     }
@@ -521,6 +521,7 @@ public class ReadingBuddy {
             CurrentBook toUpdate = currentUser.getSpecificCurrentBook(wantedPost.getBookID());
             if(toUpdate.getGroup() > 0){
                 System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
+                System.out.println("____________________________");
                 createGroup = false;
             }else{
                 createGroup = true;
@@ -552,6 +553,7 @@ public class ReadingBuddy {
                 incrementNextIdNums(2);
                 System.out.println("\nYou are now book buddies with " + wantedPost.getPoster() + " to read " +
                     newGroup.getTitle() + " by " + newGroup.getAuthor() + "!\n\n");
+                System.out.println("____________________________");
             }
             catch (IOException e) { 
                 e.printStackTrace(); 
@@ -563,9 +565,11 @@ public class ReadingBuddy {
         boolean moveForward;
         if(toCheck.getGroup() > -1){
             System.out.println("You already have a Book Buddy for this book! Check out your book group by selecting Manage Book Groups from the Main Menu.\n");
+            System.out.println("____________________________");
             moveForward = false;
         }else if(toCheck.getHasOpenSearch()){
             System.out.println("You alredy have a \"Book Buddy Wanted\" post for this book!\n");
+            System.out.println("____________________________");
             moveForward = false;
         }else{
             moveForward = true;
@@ -634,8 +638,9 @@ public class ReadingBuddy {
         ArrayList<String[]> allUsers = getAllUserData();
 
         while (currentUser.getID() == -1 || !isLoggedIn){
+            System.out.println("\nWelcome to Book Buddy!");
             System.out.println("""
-                    Enter the number corresponding to your menu selection:\n
+                    \nEnter the number corresponding to your menu selection:\n
                     1. Login
                     2. Create an Account
                     """);
@@ -649,6 +654,7 @@ public class ReadingBuddy {
     }
 
     public static int mainMenu(){
+        System.out.println("\n____________________________\n");
         System.out.println("Main Menu:\n");
         System.out.println("1. Manage My Books\n2. Find a Book Buddy!\n3. Manage Book Buddies & Groups\n4. Exit\n");
         System.out.print("Enter the number that corresponds to your menu selection: ");
@@ -659,12 +665,10 @@ public class ReadingBuddy {
     public static void manageMyBooksMenu(){
         boolean stayBooksMenu = true;
         while (stayBooksMenu){
+            System.out.println("____________________________");
             System.out.println("\nMy Books Menu:\n");
             System.out.println("""
-                1. View and Manage Currently Reading Books\n
-                2. Add a Book to Currently Reading List\n
-                3. View Finished Books\n
-                4. Return to Main Menu\n""");
+                1. View and Manage Currently Reading Books\n2. Add a Book to Currently Reading List\n3. View Finished Books\n4. Return to Main Menu\n""");
             System.out.print("Enter the number that corresponds to your menu selection: ");
             int menuSelection = validateMenuSelection(1, 4);
             switch(menuSelection){
@@ -692,15 +696,16 @@ public class ReadingBuddy {
         boolean returnToMenu = true;
         int menuSelection;
         while (returnToMenu) {
+            System.out.println("\n____________________________\n");
             System.out.print("""
                         Book Buddy Finder Menu\n
                         1. Select a book from your currently reading
-                        2. Enter a book (title and author)
-                        3. Select a book from the list of books
+                        2. Enter a book (title and author - note the title and author must be in currently reading)
+                        3. Select a book from our list of books
                         4. View all \"Book Buddy Wanted\" Posts
                         5. Manage your \"Book Buddy Wanted\" posts
 
-                        Enter your selection from the menu, or enter 0 to return to the Main Menu: """);
+                        Choose the number that corresponds your selection \nEnter 0 to return to the Main Menu \nEnter the number that corresponds to your menu selection:""");
             menuSelection = validateMenuSelection(0, 5);
             if(menuSelection == 1){
                 bookBuddyFromCurrentlyReading();
@@ -732,9 +737,11 @@ public class ReadingBuddy {
         boolean stayIn = true;
         while (stayIn) {
             if(usersPosts.size() == 0){
+                System.out.println("____________________________");
                 System.out.println("\nYou currently have no \"Book Buddy Wanted\" posts.\n\n");
                 stayIn = false;
             }else{
+                System.out.println("____________________________\n");
                 System.out.println("Your Book Buddy Wanted Posts:\n");
                 for(int x = 1; x <= usersPosts.size(); x++){
                     System.out.println(x + ". " + usersPosts.get(x-1).getTitle() + " by " + usersPosts.get(x-1).getAuthor());
@@ -742,7 +749,7 @@ public class ReadingBuddy {
                 }
                 System.out.print("""
                         \nEnter the number corresponding to a Book Buddy Wanted post to delete it,
-                        or enter 0 to return to the \"Find a Book Buddy\" menu:  """);
+                        Enter 0 to return to the \"Find a Book Buddy\" menu:  """);
                 menuSelection = validateMenuSelection(0, usersPosts.size());
                 if(menuSelection == 0){
                     stayIn = false;
@@ -777,6 +784,7 @@ public class ReadingBuddy {
         //!!!IF return val > 0 AND <= passed in ArrayList size: that number minus (-) 1 is the index number of selected post
         // to accept in the ArrayList passed in)
         //!!IF return val == ArrayList passed in .size()+1: user selects make a new post for that book
+        System.out.println("____________________________");
         System.out.println("Posts Searching for a Book Buddy to Read " + posts.get(0).getTitle() + 
         " by " + posts.get(0).getAuthor() + ":\n");
         int x;
@@ -801,11 +809,12 @@ public class ReadingBuddy {
         int menu2Selection = -1;
         int menu3Selection = -1;
         System.out.println("\n");
+        System.out.println("____________________________");
         while (stayInMenu) {
             for(int i = 0; i < allBooks.size(); i++){
                 System.out.println((i+1) + ". " + allBooks.get(i).getTitle() + " by " + allBooks.get(i).getAuthor());
             }
-            System.out.print("\nEnter the corresponding number to select a book to find a book buddy (make a Book Buddy" +
+            System.out.print("\nEnter the corresponding number to select a book to find a book buddy for (make a Book Buddy" +
              "Wanted post or answer someone else's), or 0 to return to the menu:");
             menuSelection = validateMenuSelection(0, allBooks.size());
             if(menuSelection > 0){
@@ -856,6 +865,7 @@ public class ReadingBuddy {
     }
 
     public static void viewAllSearchPosts(){
+        System.out.println("____________________________");
         System.out.println("All \"Book Buddy Wanted\" Posts:\n\n");
         int i;
         ArrayList<SearchPost> postsToShow = new ArrayList<SearchPost>();
@@ -871,7 +881,7 @@ public class ReadingBuddy {
                 System.out.println((i+1) + ". Read " + postsToShow.get(i).getTitle() + " by " +
                 postsToShow.get(i).getAuthor() + " with " + postsToShow.get(i).getPoster() + "\n");
             }
-            System.out.print("Enter the corresponding number to select a post and become Book Buddies, " +
+            System.out.print("Enter the corresponding number to select a post and become Book Buddies " +
             "or 0 to return to the menu:");
             int menuSelection = validateMenuSelection(0, postsToShow.size());
             if(menuSelection > 0){
@@ -885,6 +895,7 @@ public class ReadingBuddy {
     public static void enterSearchPostByBook(){
         int seePosts = -1;
         boolean endNow = false;
+        System.out.println("____________________________");
         String title = checkStrInput("Enter the book's title: ");
         String author = checkStrInput("Enter the name of the book's author: ");
         //This array should only have one item (if any) because search by title and author
@@ -903,6 +914,7 @@ public class ReadingBuddy {
                 boolean alreadyHasPost = checkForOwnSearchPost(postMatches, title, author);
                 if(alreadyHasPost){
                     System.out.println("\nLooks like you already have a post for that book!\n");
+                    System.out.println("____________________________");
                     endNow = true;
                 }else{
                     seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
@@ -920,6 +932,7 @@ public class ReadingBuddy {
                 if(menu2Selection == 1){
                     createNewSearchPost(searchMatches.get(0));
                     System.out.println("Posted!\n\n");
+                    System.out.println("____________________________");
                 }
             }
         } else {
@@ -929,6 +942,7 @@ public class ReadingBuddy {
                 Book bookToAdd = addNewBook(title, author);
                 createNewSearchPost(bookToAdd);
                 System.out.println("Posted!\n\n");
+                System.out.println("____________________________");
             }
         }
     }
@@ -939,11 +953,13 @@ public class ReadingBuddy {
         int menu3Selection;
         if (currentUser.getCurrentlyReading().size() < 1){
             System.out.println("You have no books in your Currently Reading.\n");
+            System.out.println("____________________________");
         } else {
             //use a separate counter since will skip books that already have a book buddy
             int counter = 0;
             //keep books that don't have a buddy in temp separate array to have corresponding number
             ArrayList<CurrentBook> tempCurrentBooks = new ArrayList<CurrentBook>();
+            System.out.println("\n____________________________\n");
             for(int i = 1; i <= currentUser.getCurrentlyReading().size(); i++){
                 if(currentUser.getCurrentlyReading().get(i-1).getGroup() == -1 &&
                  !currentUser.getCurrentlyReading().get(i-1).getHasOpenSearch()){
@@ -956,7 +972,7 @@ public class ReadingBuddy {
                     tempCurrentBooks.add(currentUser.getCurrentlyReading().get(i-1));
                 }
             }
-            System.out.print("To select a book, enter the corresponding number to the book.\nTo return to the previous menu enter 0: ");
+            System.out.print("To select a book, enter the corresponding number to the book.To return to the previous menu enter 0. \nEnter the number that corresponds to your menu selection:: ");
             menuSelection = validateMenuSelection(0, counter);
             int seePosts = -1;
             if (menuSelection != 0){
@@ -966,9 +982,10 @@ public class ReadingBuddy {
                     //SHOULD I REMOVE THIS? this might be redundant because if already has search post it won't go into the temp
                     boolean alreadyHasPost = checkForOwnSearchPost(matches, selectedBook.getTitle(), selectedBook.getAuthor());
                     if(alreadyHasPost){
-                        System.out.println("Looks like you already have a post for that book!");
+                        System.out.println("\nLooks like you already have a post for that book!");
+                        System.out.println("____________________________");
                     }else{
-                        seePosts = confirmSelection("Would you like to see other users' Book Buddy Wanted posts for this book?");
+                        seePosts = confirmSelection("\nWould you like to see other users' Book Buddy Wanted posts for this book?");
                         if(seePosts == 1){
                             menu2Selection = displayAndGetSearchPostSelection(matches);
                             if(menu2Selection > 0 && menu2Selection <= matches.size()){
@@ -983,6 +1000,7 @@ public class ReadingBuddy {
                     if(menu3Selection == 1){
                         createNewSearchPost(selectedBook);
                         System.out.println("Posted!\n\n");
+                        System.out.println("____________________________");
                     }
                 }
             }
@@ -995,9 +1013,10 @@ public class ReadingBuddy {
         int i;
         CurrentBook selectedBook;
         while (stayCurrentBooks){
-            System.out.println("\n\nCurrently Reading Manager\n");
+            System.out.println("____________________________");
+            System.out.println("\n\nCurrently Reading Manager\n\n");
             if (currentUser.getCurrentlyReading().size() < 1){
-                System.out.println("You have no books in your Currently Reading.\n Returning you to the My Books Menu (there is an option there to add books to your Currently Reading!)");
+                System.out.println("You have no books in your Currently Reading.\n Returning you to the My Books Menu (From here, there is an option there to add books to your Currently Reading!)");
                 stayCurrentBooks = false;
             } else {
                 for(i = 1; i <= currentUser.getCurrentlyReading().size(); i++){
@@ -1010,13 +1029,14 @@ public class ReadingBuddy {
                     }
                     System.out.println((""));
                 }
-                System.out.print("To update your current page, mark a book as finished, or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0: ");
+                System.out.print("\nTo update your current page, mark a book as finished, or remove a book, enter the corresponding number to the book.\nTo return to the Books Menu enter 0.\n\nEnter your menu selection:  ");
                 numSelected = validateMenuSelection(0, currentUser.getCurrentlyReading().size());
                 if(numSelected == 0){
                     stayCurrentBooks = false;
                 } else {
                     //give user options for selected book
                     selectedBook = currentUser.getCurrentlyReading().get(numSelected-1);
+                    System.out.println("____________________________");
                     System.out.println("\nYou have selected " + selectedBook.getTitle() + " by " +
                     selectedBook.getAuthor() + ":\n");
                     System.out.print("""
@@ -1107,10 +1127,11 @@ public class ReadingBuddy {
         int i;
         ReadBook selectedBook;
         while (stayReadBooks){
-            System.out.println("\n\nRead Books Manager\n");
+            System.out.println("____________________________");
+            System.out.println("\n\nFinished Books Manager\n");
             //if user has no current books send them back to books menu
             if (currentUser.getReadBooks().size() < 1){
-                System.out.println("You have no read books yet. Returning to My Books Menu");
+                System.out.println("You have no finished books yet. Returning to My Books Menu");
                 stayReadBooks = false;
             } else {
                 //give user option to return to books menu or to select a book to mark as done or remove
@@ -1138,11 +1159,13 @@ public class ReadingBuddy {
         boolean stayInMenu = true;
         while(stayInMenu){
             //CAN ADD SEARCH BOOKS (by title and/or author) LATER
+            System.out.println("\n____________________________\n");
+            System.out.println("Add a book to currently reading:");
             System.out.print("""
                 \n
-                1. Enter a book (title and author)\n
-                2. Select a book from our list of books\n
-                3. Return to My Books Menu\n
+                1. Enter a book (title and author)
+                2. Select a book from our list of books
+                3. Return to My Books Menu \n
                 Enter the number that corresponds to your menu selection:
                 """);
             int menuSelection = validateMenuSelection(1, 3);
@@ -1152,6 +1175,7 @@ public class ReadingBuddy {
             int confirmation;
             int alreadyInCurrentBooks;
             if(menuSelection == 1){
+                System.out.println("____________________________");
                 String title = checkStrInput("Enter the book's title:");
                 String author = checkStrInput("Enter the name of the book's author:\n");
                 confirmation = confirmSelection(("\nAdd " + title + " by " + author + " to your Currently Reading?"));
@@ -1305,6 +1329,7 @@ public class ReadingBuddy {
                 keepTrying = false;
             } else {
                 System.out.println("Incorrect username and/or password");
+                System.out.println("____________________________");
                 int yesOrNo = confirmSelection("Would you like to try logging in again?");
                 if (yesOrNo == 2) {
                     keepTrying = false;
@@ -1328,6 +1353,7 @@ public class ReadingBuddy {
         if(currentUser.getBookGroups().size() > 0){
             int menuSelection;
             while (stayInMenu) {
+                System.out.println("____________________________");
                 System.out.println("\n\nYour Book Groups: \n");
                 for(int i = 0; i < currentUser.getBookGroups().size(); i++){
                     System.out.println((i+1) + ".  Book Buddy: " + 
@@ -1347,6 +1373,7 @@ public class ReadingBuddy {
                 }
             }
         }else{
+            System.out.println("____________________________");
             System.out.println("""
                 You are not currently in any book groups--search Book Buddy Wanted posts to start a group right away
                  or create your own Book Buddy Wanted post!
@@ -1382,7 +1409,7 @@ public class ReadingBuddy {
                 currentGroup.addNewPost();
             }else if (menuSelection == 2){
                 currentGroup.showPosts();
-                System.out.println("\nEnter 1 to write a new post, or enter 0 to retrun to the Book Groups menu: ");
+                System.out.println("\nEnter 1 to write a new post or enter 0 to return to the Book Groups menu: ");
                 menu2Selection = validateMenuSelection(0, 1);
                 if (menu2Selection == 1) {
                     currentGroup.addNewPost();

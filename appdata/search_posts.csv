@@ -1,3 +1,7 @@
 "poster","book_id","title","author","date_posted"
 "tester1","5","Something Something","Someone Somewhere","2024-07-11"
 "tester1","3","Testing Title","John Doe","2024-07-16"
+"tester1","4","Second Tester Book","Some Author","2024-08-05"
+"tester1","13","testbook","writer","2024-08-11"
+"tester1","11","testingtesting","ihope this works","2024-08-11"
+"tester1","15","testbook","testauth","2024-08-11"

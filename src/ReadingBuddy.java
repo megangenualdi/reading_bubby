@@ -699,7 +699,7 @@ public class ReadingBuddy {
             System.out.print("""
                         Book Buddy Finder Menu\n
                         1. Select a book from your currently reading
-                        2. Enter a book (title and author - note the title and author must be in currently reading)
+                        2. Enter a book (title and author)
                         3. Select a book from our list of books
                         4. View all \"Book Buddy Wanted\" Posts
                         5. Manage your \"Book Buddy Wanted\" posts
@@ -899,8 +899,9 @@ public class ReadingBuddy {
         String author = checkStrInput("Enter the name of the book's author: ");
         //This array should only have one item (if any) because search by title and author
         ArrayList<Book> searchMatches = searchAllBooks(title, author);
-        int bookIndex = currentUser.checkIfInCurrentBooks(searchMatches.get(0).getID());
         if(searchMatches.size() > 0){
+            //!!FIX implemented 08/12/2024 -- moved below line from line 902
+            int bookIndex = currentUser.checkIfInCurrentBooks(searchMatches.get(0).getID());
             int menuSelection = -1;
             if(bookIndex >= 0){
                 if(currentUser.getCurrentlyReading().get(bookIndex).getGroup() > 0){
@@ -941,6 +942,9 @@ public class ReadingBuddy {
                 Book bookToAdd = addNewBook(title, author);
                 createNewSearchPost(bookToAdd);
                 System.out.println("Posted!\n\n");
+                System.out.println("____________________________");
+            }else{
+                System.out.println("Returning you to menu\n\n");
                 System.out.println("____________________________");
             }
         }

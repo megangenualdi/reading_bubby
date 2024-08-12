@@ -1,5 +1,9 @@
 # reading_bubby
-Cs-335 Software Engineering Project
+CS-335 Software Engineering Project
+
+Designer: Megan Genualdi
+Programmer: Sophie Steinberger
+Tester: Jessica Chait
 
 # To Run in Visual Studio Code:
 

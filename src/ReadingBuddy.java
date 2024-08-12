@@ -1,10 +1,10 @@
 /*
  * CS335 
  * Summer 2024
- * Group 1
- * Name: Sophie Steinberger
+ * Group 1: Megan Genualdi, Jessica Chait, Sophie Steinberger
+ * Programmer: Sophie Steinberger
  * Created: 06/11/2024
- * Last Updated: 07/23/2024
+ * Last Updated: 08/12/2024
  */
 
 package reading_bubby.src;
@@ -29,7 +29,7 @@ public class ReadingBuddy {
     static ArrayList<BookGroup> allBookGroups = new ArrayList<BookGroup>();
     static ArrayList<GroupPost> allGroupPosts = new ArrayList<GroupPost>();
 
-    //INPUT VALIDATION (and helpers)
+    //INPUT VALIDATION FUNCTIONS (and helpers)
 
     public static int validateMenuSelection(int minVal, int maxVal){
         int selection = -1;
@@ -72,8 +72,8 @@ public class ReadingBuddy {
         return userInput;
     }
 
-    //get+validate username or password - no whitespace allowed 
-    //(whatEntered can be username or password (or anything else that fits this syntax))
+    //used to get+validate username or password w/ no whitespace allowed, but can be used to validate any string that should not contain white space
+    //(whatEntered can be username or password or anything else that fits this syntax--whatEntered being the name of the piece of data the user is entering)
     public static String validateInputNoSpaces(String prompt, String whatEntered){
         boolean isValid = false;
         System.out.print(prompt);
@@ -103,7 +103,7 @@ public class ReadingBuddy {
         return true;
     }    
 
-    //FUNCTIONS FOR GETTING DATA AT LOGIN (the ones not belonging to User)
+    //FUNCTIONS FOR INITIAL READING IN OF DATA
     public static void getNextIds(){
         try { 
             FileReader filereader = new FileReader("reading_bubby/appdata/next_id_nums.csv"); 
@@ -214,7 +214,7 @@ public class ReadingBuddy {
         } 
     }
 
-    //UPDATED - MOVED FROM USER CLASS (now adds groups to a static variable and to the user's own attribute)
+    //adds groups to a static variable and to the user's own attribute
     public static ArrayList<Integer> initialGetBookGroups(){
         ArrayList<Integer> groupNums = new ArrayList<Integer>();
         try { 
@@ -242,7 +242,6 @@ public class ReadingBuddy {
         }
     }
 
-    //NEW SPRINT3 - MOVED from User.java
     public static ArrayList<GroupPost> getGroupPostData(ArrayList<Integer> groupNums){
         ArrayList<GroupPost> userGroupPosts = new ArrayList<GroupPost>();
         try { 
@@ -268,7 +267,7 @@ public class ReadingBuddy {
         } 
     }
 
-    //FUNCTIONS FOR UPDATING DATA
+    //FUNCTIONS FOR UPDATING, DELETING, AND WRITING NEW DATA (and helpers)
 
     public static void removeGroupsPosts(BookGroup groupToRemove){
         File file = new File("reading_bubby/appdata/group_posts.csv"); 
@@ -293,7 +292,7 @@ public class ReadingBuddy {
         } 
     }
 
-    //NEW SPRINT3: remove a bookgroup from allBookGroups and grom the book_groups.csv file
+    //remove a bookgroup from allBookGroups and grom the book_groups.csv file
     public static void removeBookGroup(BookGroup toRemove){
         File file = new File("reading_bubby/appdata/book_groups.csv"); 
         try { 
@@ -1445,7 +1444,6 @@ public class ReadingBuddy {
         }
     }
 
-    //NEW SPRINT3
     public static void handleEndBookGroupViaManager(BookGroup toEnd){
         int selection1;
         int selection2;

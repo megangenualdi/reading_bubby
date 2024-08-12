@@ -1,10 +1,10 @@
 /*
  * CS335 
  * Summer 2024
- * Group 1
- * Name: Sophie Steinberger
+ * Group 1: Megan Genualdi, Jessica Chait, Sophie Steinberger
+ * Programmer: Sophie Steinberger
  * Created: 06/11/2024
- * Last Updated: 07/23/2024
+ * Last Updated: 08/12/2024
  */
 package reading_bubby.src;
 

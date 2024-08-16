@@ -1095,33 +1095,99 @@ public class ReadingBuddy {
         }
     }
 
-    public static void updateCurrentPage(CurrentBook toUpdate){
-        //get new page num
-        int newPageNum = getNewPageNum();
-        int doTheUpdate = confirmSelection(("\nUpdate the current page to " + newPageNum + "?"));
-        if(doTheUpdate == 1){
-            if(toUpdate.getGroup() > 0){
-                BookGroup groupToUpdate = currentUser.getBookGroup(toUpdate.getGroup());
-                groupToUpdate.updateCurrentPage(newPageNum);
-                updateBookGroups();
+     //displays book group info to user, options to create a post, read posts, update current page
+     public static void viewBookGroup(BookGroup currentGroup){
+        boolean stayIn = true;
+        int menuSelection;
+        int menu2Selection;
+        while (stayIn) {
+            String bookBuddyName = currentGroup.getBookBuddyName(currentUser.getUsername());
+            System.out.println("\n\n\nBook: " + currentGroup.getTitle() + " by " + currentGroup.getAuthor());
+            System.out.println("Book Buddy: " + bookBuddyName);
+            System.out.println("Your current page: " + (currentGroup.getUserIsDone(currentUser.getUsername())? "Done" : currentGroup.getUserPageNum(currentUser.getUsername())));
+            System.out.println(bookBuddyName + "'s current page: " + (currentGroup.getUserIsDone(bookBuddyName) ? "Done" : currentGroup.getUserPageNum(bookBuddyName)));
+            System.out.println("Posts in Group: " + currentGroup.getPosts().size());
+            System.out.print("""
+                 \n
+                1. Create a Post
+                2. View All Posts in Group
+                3. Update Your Current Page
+                4. End Book Group
+                5. Return to Book Groups menu:""");
+            menuSelection = validateMenuSelection(1, 5);
+            if(menuSelection == 5){
+                stayIn = false;
+            }else if(menuSelection == 1){
+                currentGroup.addNewPost();
+            }else if (menuSelection == 2){
+                currentGroup.showPosts();
+                System.out.println("\nEnter 1 to write a new post or enter 0 to return to the Book Groups menu: ");
+                menu2Selection = validateMenuSelection(0, 1);
+                if (menu2Selection == 1) {
+                    currentGroup.addNewPost();
+                }else{
+                    stayIn = false;
+                }
+            }else if(menuSelection == 3){
+                int newPageNum = getNewPageNum();
+                int doTheUpdate = confirmSelection(("\nUpdate the current page to " + newPageNum + "?"));
+                if(doTheUpdate == 1){
+                    currentGroup.updateCurrentPage(newPageNum);
+                    updateBookGroups();
+                    CurrentBook toUpdate = currentUser.getSpecificCurrentBook(currentGroup.getBookID());
+                    toUpdate.setCurrentPage(newPageNum);
+                    updateCurrentlyReading();
+                }
+            }else if(menuSelection == 4){
+                //confirm end group --> in future can add tailored responses for if both group members are done or not etc.
+                System.out.println("""
+                    You can continue a book group for as long as you would like, regardless of if one or both of you 
+                    has finished the book.""");
+                int endGroupConfirmation = confirmSelection("Are you sure you want to end this book group with " + bookBuddyName + "?");
+                if(endGroupConfirmation == 1){
+                    //adding extra level of confirmation that can be removed later
+                    int confirmation2 = confirmSelection("End book group?");
+                    if(confirmation2 == 1){
+                        handleEndBookGroupViaManager(currentGroup);
+                        stayIn = false;
+                    }
+                }
             }
-            toUpdate.setCurrentPage(newPageNum);
-            updateCurrentlyReading();
         }
     }
 
-    //gets a page number from user for updating current page number
-    public static int getNewPageNum(){
-        int newPageNum = -1;
-        System.out.print("\nEnter the page number you are currently on: ");
-        do {
-            while (!myScanner.hasNextInt()) {
-                myScanner.next();
-                System.out.print("\nEnter the page number you are currently on: ");
+     //menu of all a user's book groups
+     public static void bookGroupsManager(){
+        boolean stayInMenu = true;
+        if(currentUser.getBookGroups().size() > 0){
+            int menuSelection;
+            while (stayInMenu) {
+                System.out.println("____________________________");
+                System.out.println("\n\nYour Book Groups: \n");
+                for(int i = 0; i < currentUser.getBookGroups().size(); i++){
+                    System.out.println((i+1) + ".  Book Buddy: " + 
+                        currentUser.getBookGroups().get(i).getBookBuddyName(currentUser.getUsername()) + " \n    Reading: " +
+                         currentUser.getBookGroups().get(i).getTitle() + " by "
+                        + currentUser.getBookGroups().get(i).getAuthor() + "\n");
+                }
+                System.out.print("""
+                        \nEnter the corresponding number to select a group and view its full information, view posts made by
+                        you and your Book Buddy, and be able write a new post in the group. Or, to return to the Main Menu 
+                        enter 0: """);
+                menuSelection = validateMenuSelection(0, currentUser.getBookGroups().size());
+                if(menuSelection == 0){
+                    stayInMenu = false;
+                }else{
+                    viewBookGroup(currentUser.getBookGroups().get(menuSelection-1));
+                }
             }
-            newPageNum = myScanner.nextInt();
-        } while (newPageNum < 0);
-        return newPageNum;
+        }else{
+            System.out.println("____________________________");
+            System.out.println("""
+                You are not currently in any book groups--search Book Buddy Wanted posts to start a group right away
+                 or create your own Book Buddy Wanted post!
+                """);
+        }
     }
 
     public static void manageViewReadBooks(){
@@ -1313,6 +1379,35 @@ public class ReadingBuddy {
         return usersList;
     }
 
+    public static void updateCurrentPage(CurrentBook toUpdate){
+        //get new page num
+        int newPageNum = getNewPageNum();
+        int doTheUpdate = confirmSelection(("\nUpdate the current page to " + newPageNum + "?"));
+        if(doTheUpdate == 1){
+            if(toUpdate.getGroup() > 0){
+                BookGroup groupToUpdate = currentUser.getBookGroup(toUpdate.getGroup());
+                groupToUpdate.updateCurrentPage(newPageNum);
+                updateBookGroups();
+            }
+            toUpdate.setCurrentPage(newPageNum);
+            updateCurrentlyReading();
+        }
+    }
+
+    //gets a page number from user for updating current page number
+    public static int getNewPageNum(){
+        int newPageNum = -1;
+        System.out.print("\nEnter the page number you are currently on: ");
+        do {
+            while (!myScanner.hasNextInt()) {
+                myScanner.next();
+                System.out.print("\nEnter the page number you are currently on: ");
+            }
+            newPageNum = myScanner.nextInt();
+        } while (newPageNum < 0);
+        return newPageNum;
+    }
+
     public static void login(ArrayList<String[]> usersList){
         boolean keepTrying = true;
         String username;
@@ -1348,104 +1443,6 @@ public class ReadingBuddy {
             }
         }
         return -1;
-    }
-
-    //menu of all a user's book groups
-    public static void bookGroupsManager(){
-        boolean stayInMenu = true;
-        if(currentUser.getBookGroups().size() > 0){
-            int menuSelection;
-            while (stayInMenu) {
-                System.out.println("____________________________");
-                System.out.println("\n\nYour Book Groups: \n");
-                for(int i = 0; i < currentUser.getBookGroups().size(); i++){
-                    System.out.println((i+1) + ".  Book Buddy: " + 
-                        currentUser.getBookGroups().get(i).getBookBuddyName(currentUser.getUsername()) + " \n    Reading: " +
-                         currentUser.getBookGroups().get(i).getTitle() + " by "
-                        + currentUser.getBookGroups().get(i).getAuthor() + "\n");
-                }
-                System.out.print("""
-                        \nEnter the corresponding number to select a group and view its full information, view posts made by
-                        you and your Book Buddy, and be able write a new post in the group. Or, to return to the Main Menu 
-                        enter 0: """);
-                menuSelection = validateMenuSelection(0, currentUser.getBookGroups().size());
-                if(menuSelection == 0){
-                    stayInMenu = false;
-                }else{
-                    viewBookGroup(currentUser.getBookGroups().get(menuSelection-1));
-                }
-            }
-        }else{
-            System.out.println("____________________________");
-            System.out.println("""
-                You are not currently in any book groups--search Book Buddy Wanted posts to start a group right away
-                 or create your own Book Buddy Wanted post!
-                """);
-        }
-    }
-
-    //displays book group info to user, options to create a post, read posts, update current page
-    public static void viewBookGroup(BookGroup currentGroup){
-        boolean stayIn = true;
-        int menuSelection;
-        int menu2Selection;
-        while (stayIn) {
-            String bookBuddyName = currentGroup.getBookBuddyName(currentUser.getUsername());
-            System.out.println("\n\n\nBook: " + currentGroup.getTitle() + " by " + currentGroup.getAuthor());
-            System.out.println("Book Buddy: " + bookBuddyName);
-            //NEW SPRINT3: ternary operator to display page number or "Done" depending on if user done or not (left old commented out until tested)
-            System.out.println("Your current page: " + (currentGroup.getUserIsDone(currentUser.getUsername())? "Done" : currentGroup.getUserPageNum(currentUser.getUsername())));
-            System.out.println(bookBuddyName + "'s current page: " + (currentGroup.getUserIsDone(bookBuddyName) ? "Done" : currentGroup.getUserPageNum(bookBuddyName)));
-            System.out.println("Posts in Group: " + currentGroup.getPosts().size());
-            //NEW SPRINT3: adding option to end a book group
-            System.out.print("""
-                 \n
-                1. Create a Post
-                2. View All Posts in Group
-                3. Update Your Current Page
-                4. End Book Group
-                5. Return to Book Groups menu:""");
-            menuSelection = validateMenuSelection(1, 5);
-            if(menuSelection == 5){
-                stayIn = false;
-            }else if(menuSelection == 1){
-                currentGroup.addNewPost();
-            }else if (menuSelection == 2){
-                currentGroup.showPosts();
-                System.out.println("\nEnter 1 to write a new post or enter 0 to return to the Book Groups menu: ");
-                menu2Selection = validateMenuSelection(0, 1);
-                if (menu2Selection == 1) {
-                    currentGroup.addNewPost();
-                }else{
-                    stayIn = false;
-                }
-            }else if(menuSelection == 3){
-                int newPageNum = getNewPageNum();
-                int doTheUpdate = confirmSelection(("\nUpdate the current page to " + newPageNum + "?"));
-                if(doTheUpdate == 1){
-                    currentGroup.updateCurrentPage(newPageNum);
-                    updateBookGroups();
-                    CurrentBook toUpdate = currentUser.getSpecificCurrentBook(currentGroup.getBookID());
-                    toUpdate.setCurrentPage(newPageNum);
-                    updateCurrentlyReading();
-                }
-            }else if(menuSelection == 4){
-                //NEW SPRINT3
-                //confirm end group --> CAN ADD MORE LATER (TAILOR RESPONSES TO IF BOTH GROUP MEMBERS ARE DONE OR NOT ETC)
-                System.out.println("""
-                    You can continue a book group for as long as you would like, regardless of if one or both of you 
-                    has finished the book.""");
-                int endGroupConfirmation = confirmSelection("Are you sure you want to end this book group with " + bookBuddyName + "?");
-                if(endGroupConfirmation == 1){
-                    //adding extra level of confirmation that can be removed later
-                    int confirmation2 = confirmSelection("End book group?");
-                    if(confirmation2 == 1){
-                        handleEndBookGroupViaManager(currentGroup);
-                        stayIn = false;
-                    }
-                }
-            }
-        }
     }
 
     public static void handleEndBookGroupViaManager(BookGroup toEnd){
@@ -1508,17 +1505,17 @@ public class ReadingBuddy {
     public static void main(String[] args){
         //data gathering to happen before login
         getNextIds();
-        getAllBooks();
 
         //this runs a loop that will prevent anything below from running until user logged in
         manageEntry();
 
         //once user logged in pull in all the relevant info for user
+        getAllBooks();
         getAllReadBooksData();
         getAllCurrentBooksData();
         getAllSearchPosts();
 
-        //post-login code that only runs once (and thus not iin the main menu loop)
+        //post-login code that only runs once (and thus not in the main menu loop)
         if (currentUser.getID() > 0 && isLoggedIn){
             System.out.println("\n\n\nHello " + currentUser.getUsername() + "!\n");
             currentUser.initialSetCurrentlyReading(allCurrentBooks);
